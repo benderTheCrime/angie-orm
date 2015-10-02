@@ -1,8 +1,8 @@
 // Test Modules
-import {expect} from            'chai';
+import { expect } from      'chai';
 
 // Angie Modules
-import BaseDBConnection from    '../../../src/databases/BaseDBConnection';
+const BaseDBConnection =    require(`../../../${global.TEST_ENV}/databases/BaseDBConnection`).default;
 
 describe('BaseDBConnection', function() {
     let base;
