@@ -29,25 +29,32 @@ function AngieDatabaseRouter(args) {
         name = 'default';
 
     if (!config && !global.app.$$config) {
-        try {
-            const $$config = JSON.parse(
-                fs.readFileSync(`${process.cwd()}/AngieORMFile.json`)
-            );
+        let $$config;
 
-            if (typeof $$config === 'object') {
-                global.app.$$config = $$config;
-                Object.freeze(app.$$config);
-            } else {
-                throw new Error();
+        try {
+            $$config = JSON.parse(
+                fs.readFileSync(`${p.cwd()}/AngieORMFile.json`)
+            );
+        } catch(e) {}
+
+        if (!$$config) {
+            try {
+                $$config = JSON.parse(
+                    fs.readFileSync(`${p.cwd()}/AngieFile.json`)
+                );
+            } catch(e) {
+                throw new $$InvalidConfigError();
             }
-        } catch(e) {
+        }
+
+        if (typeof $$config === 'object') {
+            app.$$config = $$config;
+            Object.freeze(app.$$config);
+        } else {
             throw new $$InvalidConfigError();
         }
     }
     config = global.app.$$config;
-
-
-
 
     if (args instanceof Array) {
         for (let arg of args) {
@@ -70,8 +77,8 @@ function AngieDatabaseRouter(args) {
     let db = config.databases && config.databases[ name ] ?
             config.databases[ name ] : config.databases.default ?
                 config.databases.default : null,
-        destructive = p.argv.some((v) => /--destructive/i.test(v)),
-        dryRun = p.argv.some((v) => /--dry([-_])?run/i.test(v));
+        destructive = p.argv.some(v => /--destructive/i.test(v)),
+        dryRun = p.argv.some(v => /--dry([-_])?run/i.test(v));
 
     if (db && db.type) {
         switch (db.type.toLowerCase()) {

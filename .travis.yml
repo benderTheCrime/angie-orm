@@ -3,6 +3,7 @@ node_js:
   - 0.12
   - iojs-v2.5.0
   - 4.0.0
+  - 4.2.1
 deploy:
   provider: npm
   email: joe.groseclose@gmail.com

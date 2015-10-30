@@ -5,8 +5,8 @@
  */
 
 // System Modules
-import {exec} from                  'child_process';
-import {gray} from                  'chalk';
+import { exec } from                'child_process';
+import { bold, gray } from          'chalk';
 import $LogProvider from            'angie-log';
 
 // Angie ORM Global Modules
@@ -31,13 +31,15 @@ p.argv.forEach(function(v) {
 // Route the CLI request to a specific command if running from CLI
 if (
     args.length &&
-    args.some((v) => [ 'syncdb', 'migrate', 'test' ].indexOf(v) > -1)
+    args.some(v => [ 'syncdb', 'migrate', 'test' ].indexOf(v) > -1)
 ) {
     switch ((args[0] || '').toLowerCase()) {
         case 'syncdb':
+            console.log('in dbsync');
             AngieDatabaseRouter(args).sync();
             break;
         case 'migrate':
+            console.log('in migrate');
             AngieDatabaseRouter(args).migrate();
             break;
         default:
@@ -61,35 +63,28 @@ function runTests() {
 }
 
 function help() {
-    $LogProvider.bold('Angie ORM');
+    console.log(bold('Angie ORM'));
     console.log('A Feature-Complete Database Relationship Manager Designed for NodeJS');
     console.log('\r');
-    $LogProvider.bold('Version:');
+    console.log(bold('Version:'));
     console.log(global.ANGIE_ORM_VERSION);
     console.log('\r');
-    $LogProvider.bold('Commands:');
-    console.log(
-        'syncdb [ database ]                                                   ' +
-        gray(
-            'Sync the current specified databases in the AngieFile. ' +
-            'Defaults to the default created database'
-        )
-    );
-    console.log(
-        'migrations [ --destructive -- optional ] [ --dryrun -- optional ]     ' +
-        gray(
-            'Checks to see if the database and the specified ' +
-            'models are out of sync. Generates NO files.'
-        )
-    );
-    console.log(
-        'test                                                                  ' +
-        gray(
-            'Runs the Angie test suite and prints the results in the ' +
-            'console'
-        )
-    );
-    p.exit(0);
+    console.log(bold('Commands:'));
+    console.log('syncdb [ database ]');
+    console.log(gray(
+        'Sync the current specified databases in the AngieFile. ' +
+        'Defaults to the default created database'
+    ));
+    console.log('migrations [ --destructive -- optional ] [ --dryrun -- optional ]');
+    console.log(gray(
+        'Checks to see if the database and the specified ' +
+        'models are out of sync. Generates NO files.'
+    ));
+    console.log('test');
+    console.log(gray(
+        'Runs the Angie test suite and prints the results in the ' +
+        'console'
+    ));
 }
 
-export {$$FieldProvider as $$Fields};
+export { $$FieldProvider as $$Fields };

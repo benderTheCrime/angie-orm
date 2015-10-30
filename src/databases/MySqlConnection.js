@@ -28,7 +28,7 @@ class MySqlConnection extends BaseDBConnection {
         if (!db.username) {
             throw new $$InvalidDatabaseConfigError(db);
         } else if (!this.connection) {
-            this.name = name || this.database.name || this.database.alias;
+            this.name =this.database.name || this.database.alias || name;
             this.connection = mysql.createConnection({
                 host: db.host || DEFAULT_HOST,
                 port: db.port || DEFAULT_PORT,
