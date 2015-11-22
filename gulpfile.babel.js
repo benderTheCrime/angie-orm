@@ -79,6 +79,9 @@ gulp.task('test', [ 'test:src' ]);
 gulp.task('watch', [ 'test' ], function() {
     gulp.watch([ SRC, TEST_SRC ], [ 'test' ]);
 });
+gulp.task('watch:babel', [ 'babel' ], function() {
+    gulp.watch([ 'src/**' ], [ 'babel' ]);
+});
 gulp.task('default', [ 'cobertura', 'babel', 'esdoc' ]);
 
 // Utility Tasks
