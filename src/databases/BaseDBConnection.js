@@ -79,7 +79,7 @@ class BaseDBConnection {
         }
 
         const int = args.rows,
-              fetchQuery = `ORDER BY id ${ord} ${int ? `LIMIT ${int}` : ''}`;
+              fetchQuery = `ORDER BY id ${ord}${int ? ` LIMIT ${int}` : ''}`;
         return this.all(args, fetchQuery, filterQuery);
     }
     filter(args = {}) {
