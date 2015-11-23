@@ -78,8 +78,8 @@ class BaseDBConnection {
             ord = 'DESC';
         }
 
-        const int = args.rows || 1,
-              fetchQuery = `ORDER BY id ${ord} LIMIT ${int}`;
+        const int = args.rows,
+              fetchQuery = `ORDER BY id ${ord} ${int ? `LIMIT ${int}` : ''}`;
         return this.all(args, fetchQuery, filterQuery);
     }
     filter(args = {}) {
@@ -202,7 +202,9 @@ class BaseDBConnection {
         return global.app.$$load().then(function() {
             me._models = global.app.Models;
             $LogProvider.info(
-                `Synccing database: ${cyan(me.database.name || me.database.alias)}`
+                `Synccing database: ${
+                    cyan(me.database.name || me.database.alias)
+                }`
             );
         });
     }
@@ -213,7 +215,9 @@ class BaseDBConnection {
         return global.app.$$load().then(function() {
             me._models = global.app.Models;
             $LogProvider.info(
-                `Migrating database: ${cyan(me.database.name || me.database.alias)}`
+                `Migrating database: ${
+                    cyan(me.database.name || me.database.alias)
+                }`
             );
         });
     }
