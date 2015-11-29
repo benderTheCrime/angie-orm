@@ -20,7 +20,7 @@ import {
 
 // Setup the app or inherit the app from the `global` Namespace
 const p = process;
-let app;
+let app = global.app;
 
 app.Model = app.model = function Model(name, Obj = {}) {
     let model = typeof Obj === 'function' ?
