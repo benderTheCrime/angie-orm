@@ -20,10 +20,13 @@ const IGNORE_KEYS = [
     'model',
     'name',
     'fields',
+    'tail',
+    'head',
     'rows',
     'update',
     'first',
-    'last'
+    'last',
+    'values'
 ];
 
 class BaseModel {

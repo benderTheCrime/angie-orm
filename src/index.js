@@ -5,6 +5,7 @@
 // TODO no migrations and the same format of models implies models largely unchanged
 // TODO don't use required
 // TODO script to run sql files - model sync for JS files
+// TODO refactor Exceptions
 
 
 /**
@@ -13,44 +14,26 @@
  * @date 8/23/2015
  */
 
-import  './new-angie';
-//
-// // System Modules
-// import { exec } from                'child_process';
-// import { bold, gray } from          'chalk';
-// import $LogProvider from            'angie-log';
-//
-// // Angie ORM Global Modules
-// import './Angie';
-//
-// // Angie ORM Modules
-// import AngieDatabaseRouter from     './databases/AngieDatabaseRouter';
-// import * as $$FieldProvider from    './models/$Fields';
-//
-// const p = process;
+import                                          './new-angie';
+import { default as $$createModel } from        './util/scaffold/table';
+
 let args = [];
-//
-// // Remove trivial arguments
+
+// Remove trivial arguments
 process.argv.forEach(function(v) {
-    if (!v.match(/(node|iojs|index|help|angie(\-orm)?)/)) {
+    if (!v.match(/(node|iojs|index|angie(\-orm)?)/)) {
         args.push(v);
-    } else if (v === 'help') {
-        help();
     }
 });
-//
-// // Route the CLI request to a specific command if running from CLI
-if (
-    args.length &&
-    args.some(v => [ 'test' ].indexOf(v) > -1)
-) {
-    switch ((args[0] || '').toLowerCase()) {
-        case 'create':
-            console.log(args);
-            // switch ((args[1] || ''))
-        default:
-            runTests();
-    }
+
+// Route the CLI request to a specific command if running from CLI
+switch ((args[0] || '').toLowerCase()) {
+    case 'create':
+        $$createModel();
+        break;
+    case 'test':
+        runTests();
+        break;
 }
 
 function runTests() {

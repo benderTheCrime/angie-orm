@@ -1,12 +1,12 @@
 /**
- * @module BaseDBConnection.js
+ * @module base-connection.js
  * @author Joe Groseclose <@benderTheCrime>
  * @date 8/23/2015
  */
 
 // System Modules
 import util from                        'util';
-import {cyan} from                      'chalk';
+import { cyan } from                    'chalk';
 import $LogProvider from                'angie-log';
 
 // Angie ORM Modules
@@ -17,15 +17,20 @@ import {
 } from                                  '../util/$ExceptionsProvider';
 
 // Keys we do not necessarily want to parse as query arguments
-const p = process,
-      IGNORE_KEYS = [
-          'database',
-          'tail',
-          'head',
-          'rows',
-          'values',
-          'model'
-      ];
+const IGNORE_KEYS = [
+    'database',
+    '$$database',
+    'model',
+    'name',
+    'fields',
+    'tail',
+    'head',
+    'rows',
+    'update',
+    'first',
+    'last',
+    'values'
+];
 
 /**
  * @desc BaseDBConnection is a private class which is not exposed to the Angie
@@ -41,12 +46,9 @@ class BaseDBConnection {
     /**
      * @param {object} database The database object to which the connection is
      * being made
-     * @param {boolean} destructive Should destructive migrations be run?
      */
-    constructor(database, destructive = false, dryRun = false) {
+    constructor(database) {
         this.database = database;
-        this.destructive = destructive;
-        this.dryRun = dryRun;
     }
     models() {
         return this._models;
@@ -69,14 +71,10 @@ class BaseDBConnection {
             `${fetchQuery ? ` ${fetchQuery}` : ''};`;
     }
     fetch(args = {}, filterQuery = '') {
-        let ord = 'ASC';
-
-        if (
+        let ord = `${
             (args.head && args.head === false) ||
-            (args.tail && args.tail === true)
-        ) {
-            ord = 'DESC';
-        }
+            (args.tail && args.tail === true) ? 'DE' : 'A'
+        }SC`;
 
         const int = args.rows,
               fetchQuery = `ORDER BY id ${ord}${int ? ` LIMIT ${int}` : ''}`;
@@ -195,32 +193,32 @@ class BaseDBConnection {
         }
         return `(${fieldSet.length ? fieldSet.join(',') : ''})`;
     }
-    sync() {
-        let me = this;
-
-        // Every instance of sync needs a registry of the models, which implies
-        return global.app.$$load().then(function() {
-            me._models = global.app.Models;
-            $LogProvider.info(
-                `Synccing database: ${
-                    cyan(me.database.name || me.database.alias)
-                }`
-            );
-        });
-    }
-    migrate() {
-        let me = this;
-
-        // Every instance of sync needs a registry of the models, which implies
-        return global.app.$$load().then(function() {
-            me._models = global.app.Models;
-            $LogProvider.info(
-                `Migrating database: ${
-                    cyan(me.database.name || me.database.alias)
-                }`
-            );
-        });
-    }
+    // sync() {
+    //     let me = this;
+    //
+    //     // Every instance of sync needs a registry of the models, which implies
+    //     return global.app.$$load().then(function() {
+    //         me._models = global.app.Models;
+    //         $LogProvider.info(
+    //             `Synccing database: ${
+    //                 cyan(me.database.name || me.database.alias)
+    //             }`
+    //         );
+    //     });
+    // }
+    // migrate() {
+    //     let me = this;
+    //
+    //     // Every instance of sync needs a registry of the models, which implies
+    //     return global.app.$$load().then(function() {
+    //         me._models = global.app.Models;
+    //         $LogProvider.info(
+    //             `Migrating database: ${
+    //                 cyan(me.database.name || me.database.alias)
+    //             }`
+    //         );
+    //     });
+    // }
     $$queryset(model = {}, query, rows = [], errors) {
         const queryset = new AngieDBObject(this, model, query);
         let results = [],
@@ -460,9 +458,9 @@ class $$DatabaseConnectivityError extends Error {
         }
         $LogProvider.error(message);
         super();
-        p.exit(1);
+        process.exit(1);
     }
 }
 
 export default BaseDBConnection;
-export {$$DatabaseConnectivityError};
+export { $$DatabaseConnectivityError };

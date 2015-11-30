@@ -1,28 +1,31 @@
 /**
- * @module MySqlConnection.js
+ * @module mysql-connection.js
  * @author Joe Groseclose <@benderTheCrime>
  * @date 8/23/2015
  */
 
 // System Modules
 import mysql from                       'mysql';
-import {cyan, magenta, gray} from       'chalk';
+import {
+    cyan,
+    magenta,
+    gray
+} from                                  'chalk';
 import $LogProvider from                'angie-log';
 
-// Angie Modules
-import BaseDBConnection from           './BaseDBConnection';
+// Angie ORM Modules
+import BaseDBConnection from           './base-connection';
 import {
     $$InvalidDatabaseConfigError
 } from                                  '../util/$ExceptionsProvider';
 
-const p = process,
-      DEFAULT_HOST = '127.0.0.1',
-      DEFAULT_PORT = 3306;
+const DEFAULT_HOST = '127.0.0.1',
+    DEFAULT_PORT = 3306;
 $LogProvider.mysqlInfo = $LogProvider.info.bind(null, 'MySQL');
 
 class MySqlConnection extends BaseDBConnection {
-    constructor(name, database, destructive, dryRun) {
-        super(database, destructive, dryRun);
+    constructor(name, database) {
+        super(database);
         let db = this.database;
 
         if (!db.username) {
@@ -66,8 +69,9 @@ class MySqlConnection extends BaseDBConnection {
             case 'KeyField':
                 return `INTEGER${maxLength}`;
             case 'ForeignKeyField':
-                return `INTEGER${maxLength}, ADD CONSTRAINT fk_${key} FOREIGN KEY(${key}) ` +
-                    `REFERENCES ${field.rel}(id) ON DELETE CASCADE`;
+                return `INTEGER${maxLength}, ADD CONSTRAINT fk_${key} ` +
+                    `FOREIGN KEY(${key}) REFERENCES ${field.rel}(id) ON ` +
+                    `DELETE CASCADE`;
             default:
                 return undefined;
         }
@@ -133,34 +137,34 @@ class MySqlConnection extends BaseDBConnection {
     raw(query, model) {
         return this.run(query, model);
     }
-    sync() {
-        let me = this;
-
-        // Don't worry about the error state, handled by connection
-        return super.sync().then(function() {
-            let models = me.models(),
-                proms = [];
-
-            for (let model in models) {
-
-                // Fetch models and get model name
-                let instance = models[ model ],
-                    modelName = instance.name || instance.alias ||
-                        me.$$name(model);
-
-                // Run a table creation with an ID for each table
-                proms.push(me.run(
-                    `CREATE TABLE \`${modelName}\` ` +
-                    '(`id` int(11) NOT NULL AUTO_INCREMENT, ' +
-                    'PRIMARY KEY (`id`) ' +
-                    ') ENGINE=InnoDB DEFAULT CHARSET=latin1;'
-                ));
-            }
-            return Promise.all(proms).then(function() {
-                return me.migrate();
-            });
-        });
-    }
+    // sync() {
+    //     let me = this;
+    //
+    //     // Don't worry about the error state, handled by connection
+    //     return super.sync().then(function() {
+    //         let models = me.models(),
+    //             proms = [];
+    //
+    //         for (let model in models) {
+    //
+    //             // Fetch models and get model name
+    //             let instance = models[ model ],
+    //                 modelName = instance.name || instance.alias ||
+    //                     me.$$name(model);
+    //
+    //             // Run a table creation with an ID for each table
+    //             proms.push(me.run(
+    //                 `CREATE TABLE \`${modelName}\` ` +
+    //                 '(`id` int(11) NOT NULL AUTO_INCREMENT, ' +
+    //                 'PRIMARY KEY (`id`) ' +
+    //                 ') ENGINE=InnoDB DEFAULT CHARSET=latin1;'
+    //             ));
+    //         }
+    //         return Promise.all(proms).then(function() {
+    //             return me.migrate();
+    //         });
+    //     });
+    // }
     // migrate() {
     //     let me = this;
     //     return super.migrate().then(function() {

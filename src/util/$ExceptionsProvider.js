@@ -5,10 +5,8 @@
  */
 
 // System Modules
-import {magenta, cyan} from         'chalk';
+import { magenta, cyan } from       'chalk';
 import $LogProvider from            'angie-log';
-
-const p = process;
 
 class $$InvalidConfigError extends ReferenceError {
     constructor(name = '') {
@@ -34,7 +32,6 @@ class $$InvalidModelConfigError extends TypeError {
             `${error ? ` ${error}` : ''}`
         );
         super();
-        p.exit(1);
     }
 }
 
@@ -42,7 +39,6 @@ class $$InvalidModelReferenceError extends Error {
     constructor() {
         $LogProvider.error('Invalid Model argument');
         super();
-        p.exit(1);
     }
 }
 
@@ -52,7 +48,6 @@ class $$InvalidModelFieldReferenceError extends Error {
             `Invalid param for Model ${cyan(name)}.${cyan(field)}`
         );
         super();
-        p.exit(1);
     }
 }
 

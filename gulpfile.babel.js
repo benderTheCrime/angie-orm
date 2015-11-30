@@ -68,6 +68,8 @@ gulp.task('esdoc', function() {
 });
 gulp.task('babel', function() {
     return gulp.src(SRC).pipe(babel({
+        stage: 0,
+        ignore: [ 'src/templates/**' ],
         comments: false
     })).pipe(gulp.dest(TRANSPILED_SRC_DIR));
 });
