@@ -21,10 +21,13 @@ import { $DateUtil } from               '../util';
 //      - the Angie model itself
 //      - the .proto scaffold
 
+console.log(process.cwd());
+
 const $StringUtil = $Injector.get('$StringUtil'),
-    TEMPLATE_PREFIX = '../../template/template.',
-    PROTO_TEMPLATE = `${TEMPLATE_PREFIX}proto`,
-    MODEL_TEMPLATE = `${TEMPLATE_PREFIX}model.js`;
+    TEMPLATE_PREFIX = `${__dirname}/../../templates/template.`,
+    ENCODING = 'utf8',
+    PROTO_TEMPLATE = fs.readFileSync(`${TEMPLATE_PREFIX}proto.txt`, ENCODING),
+    MODEL_TEMPLATE = fs.readFileSync(`${TEMPLATE_PREFIX}model.js.txt`, ENCODING);
 
 export default function() {
 
@@ -39,7 +42,6 @@ export default function() {
     }
 
     // TODO error if name does not exist
-    console.log(NAME, DATABASE_NAME, 'NAMES');
     const DATABASE = router(DATABASE_NAME),
         DASH_NAME = $StringUtil.toDash(NAME),
         UNDERSCORE_NAME = $StringUtil.toUnderscore(NAME),
@@ -50,35 +52,41 @@ export default function() {
         MODEL_FILE = util.format(
             MODEL_TEMPLATE,
             DASH_NAME,
+
+            // TODO fix dates
             $DateUtil.format('mm/dd/yy'),
             CAMEL_NAME.charAt(0).toUpperCase() + CAMEL_NAME.slice(1),
             UNDERSCORE_NAME
         ),
-        PROTO_DIR = `${process.cwd()}/proto/${DASH_NAME}.proto`,
+        PROTO_DIR = `${process.cwd()}/proto`,
         MODEL_DIR = `${process.cwd()}/src/models`,
         PROTO_NAME = `${DASH_NAME}.proto`,
-        MODEL_NAME = `${DASH_NAME}.model.js`;
+        MODEL_NAME = `${DASH_NAME}.model.js`,
+        PROTO_FILENAME = `${PROTO_DIR}/${PROTO_NAME}`,
+        MODEL_FILENAME = `${MODEL_DIR}/${MODEL_NAME}`;
+    let statProto = false,
+        statModel = false;
 
-    // This should be called in the root, check for a source directory and a
-    // model directory
+    // See if the proto or model files already exist
     try {
-        fs.writeFileSync(`${MODEL_DIR}/${MODEL_NAME}`, MODEL_FILE);
-    } catch(e) {
-        if (e.type === 'ENOENT') {
-            $LogProvider.warn(`Could not find directory ${cyan(MODEL_DIR)}`);
-            $LogProvider.warn(
-                `Writing ${cyan(MODEL_NAME)} to current directory`
-            );
-            fs.writeFileSync(MODEL_NAME, MODEL_FILE);
-        } else {
-            $LogProvider.error(e);
+        fs.statSync(PROTO_FILENAME);
+        statProto = true;
+        $LogProvider.info(`Proto for model ${cyan(NAME)} already exists`);
+    } catch(e) {}
+
+    try {
+        fs.statSync(MODEL_FILENAME);
+        statModel = true;
+        $LogProvider.info(`Model for model ${cyan(NAME)} already exists`);
+    } catch(e) {}
+
+    try {
+        console.log(PROTO_FILENAME, DASH_NAME);
+        if (!statProto) {
+            fs.writeFileSync(PROTO_FILENAME, PROTO_FILE);
         }
-    }
-
-    try {
-        fs.writeFileSync(`${PROTO_DIR}/${PROTO_NAME}`, PROTO_FILE);
     } catch(e) {
-        if (e.type === 'ENOENT') {
+        if (e.code === 'ENOENT') {
             $LogProvider.warn(`Could not find directory ${cyan(PROTO_DIR)}`);
             $LogProvider.warn(
                 `Writing ${cyan(PROTO_NAME)} to current directory`
@@ -89,11 +97,27 @@ export default function() {
         }
     }
 
+    try {
+        if (!statModel) {
+            fs.writeFileSync(MODEL_FILENAME, MODEL_FILE);
+        }
+    } catch(e) {
+        if (e.code === 'ENOENT') {
+            $LogProvider.warn(`Could not find directory ${cyan(MODEL_DIR)}`);
+            $LogProvider.warn(
+                `Writing ${cyan(MODEL_NAME)} to current directory`
+            );
+            fs.writeFileSync(MODEL_NAME, MODEL_FILE);
+        } else {
+            $LogProvider.error(e);
+        }
+    }
+
     $LogProvider.info(`Successfully created model files for model ${NAME}`);
     $LogProvider.info('Attempting to scaffold model in database');
 
     try {
-        console.log(database);
+        console.log(DATABASE);
     } catch(e) {}
 
     // TODO if DB does not exist create it, or try to

@@ -20,6 +20,7 @@ import istanbul from                    'gulp-istanbul';
 import cobertura from                   'istanbul-cobertura-badger';
 import esdoc from                       'gulp-esdoc';
 import babel from                       'gulp-babel';
+import copy from                        'gulp-copy';
 import { bold, red } from               'chalk';
 
 const bread = str => bold(red(str));
@@ -66,12 +67,19 @@ gulp.task('cobertura', [ 'mocha:src' ], function(cb) {
 gulp.task('esdoc', function() {
     return gulp.src(SRC_DIR).pipe(esdoc({ destination: DOC_SRC }));
 });
-gulp.task('babel', function() {
-    return gulp.src(SRC).pipe(babel({
+gulp.task('babel', function(cb) {
+    gulp.src(SRC).pipe(babel({
         stage: 0,
         ignore: [ 'src/templates/**' ],
         comments: false
-    })).pipe(gulp.dest(TRANSPILED_SRC_DIR));
+    })).pipe(gulp.dest(TRANSPILED_SRC_DIR)).on('finish', function() {
+        gulp.src(`${SRC_DIR}/templates/**`).pipe(
+            copy(`${TRANSPILED_SRC_DIR}/templates`, {
+                prefix: 2
+            })
+        );
+        cb();
+    });
 });
 
 // Bundled Tasks

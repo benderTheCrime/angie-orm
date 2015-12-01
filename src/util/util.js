@@ -10,7 +10,7 @@ const mm = (m, d) => m.replace('mm', d.getMonth() > 8 ?
     dd = (m, d) => m.replace('dd', d.getDate() > 9 ?
         d.getDate() : padZero(d.getDate())
     ),
-    yy = (m, d) => m.replace('yy', d.getYear()),
+    yy = (m, d) => m.replace('yy', d.getFullYear().toString().substr(2, 3)),
     yyyy = (m, d) => m.replace('yyyy', d.getFullYear());
 
 
@@ -37,6 +37,8 @@ class DateUtil {
         if (/yy/.test(mask)) {
             str = yy(str, d);
         }
+
+        return str;
     }
 }
 

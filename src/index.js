@@ -31,6 +31,9 @@ switch ((args[0] || '').toLowerCase()) {
     case 'create':
         $$createModel();
         break;
+    case 'c':
+        $$createModel();
+        break;
     case 'test':
         runTests();
         break;
