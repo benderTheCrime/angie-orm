@@ -5,19 +5,17 @@
  */
 
 // System Modules
-import mysql from                       'mysql';
+import mysql from                               'mysql';
 import {
     cyan,
     magenta,
     gray
-} from                                  'chalk';
-import $LogProvider from                'angie-log';
+} from                                          'chalk';
+import $LogProvider from                        'angie-log';
 
 // Angie ORM Modules
-import BaseDBConnection from           './base-connection';
-import {
-    $$InvalidDatabaseConfigError
-} from                                  '../util/$ExceptionsProvider';
+import BaseDBConnection from                    './base-connection';
+import { $$InvalidDatabaseConfigError } from    '../util/$ExceptionsProvider';
 
 const DEFAULT_HOST = '127.0.0.1',
     DEFAULT_PORT = 3306;
@@ -137,138 +135,6 @@ class MySqlConnection extends BaseDBConnection {
     raw(query, model) {
         return this.run(query, model);
     }
-    // sync() {
-    //     let me = this;
-    //
-    //     // Don't worry about the error state, handled by connection
-    //     return super.sync().then(function() {
-    //         let models = me.models(),
-    //             proms = [];
-    //
-    //         for (let model in models) {
-    //
-    //             // Fetch models and get model name
-    //             let instance = models[ model ],
-    //                 modelName = instance.name || instance.alias ||
-    //                     me.$$name(model);
-    //
-    //             // Run a table creation with an ID for each table
-    //             proms.push(me.run(
-    //                 `CREATE TABLE \`${modelName}\` ` +
-    //                 '(`id` int(11) NOT NULL AUTO_INCREMENT, ' +
-    //                 'PRIMARY KEY (`id`) ' +
-    //                 ') ENGINE=InnoDB DEFAULT CHARSET=latin1;'
-    //             ));
-    //         }
-    //         return Promise.all(proms).then(function() {
-    //             return me.migrate();
-    //         });
-    //     });
-    // }
-    // migrate() {
-    //     let me = this;
-    //     return super.migrate().then(function() {
-    //         return me.run('SHOW TABLES').then((queryset) => queryset);
-    //     }).then(function(queryset) {
-    //         // const modelMap = [
-    //         //     for (model of queryset) model[ `Tables_in_${me.name}` ]
-    //         // ];
-    //         const modelMap = queryset.map((v) => v[ `Tables_in_${me.name}` ]);
-    //         let models = me.models(),
-    //             proms = [];
-    //         for (let key of modelMap) {
-    //             let prom;
-    //             if (!models.hasOwnProperty(key)) {
-    //
-    //                 // Don't consolidate, we don't want to look at the fields
-    //                 if (me.destructive) {
-    //                     prom = me.run(`DROP TABLE \`${key}\`;`);
-    //                 }
-    //             } else {
-    //                 const model = models[ key ],
-    //                       modelName = me.$$name(model.name || model.alias),
-    //                       fields = model.$fields();
-    //                 prom = me.run(
-    //                     `SHOW COLUMNS from \`${modelName}\`;`,
-    //                     modelName
-    //                 ).then(function(queryset) {
-    //                     let proms = [];
-    //                     queryset.forEach(function(v) {
-    //                         if (
-    //                             fields.indexOf(v.Field) === -1 &&
-    //                             v.Field !== 'id' &&
-    //                             me.destructive
-    //                         ) {
-    //                             let baseQuery = `ALTER TABLE \`${modelName}\` `,
-    //                                 query =
-    //                                     `${baseQuery}DROP COLUMN \`${v.Field}\`;`,
-    //                                 keyQuery;
-    //                             if (v.Key) {
-    //                                 keyQuery =
-    //                                     `${baseQuery}DROP FOREIGN KEY ` +
-    //                                     `\`fk_${v.Field}\`;`;
-    //                             }
-    //                             if (!me.dryRun) {
-    //                                 let prom;
-    //                                 if (keyQuery) {
-    //                                     prom = me.run(keyQuery).then(
-    //                                         () => me.run(query)
-    //                                     );
-    //                                 } else {
-    //                                     prom = me.run(query);
-    //                                 }
-    //                                 proms.push(prom);
-    //                             } else {
-    //                                 $LogProvider.mysqlInfo(
-    //                                     `Dry Run Query: ${gray(`${keyQuery} ${query}`)}`
-    //                                 );
-    //                             }
-    //                         }
-    //                     });
-    //
-    //                     // TODO you've got to return if many to many here
-    //                     fields.forEach(function(v) {
-    //                         if (model[ v ].type === 'ManyToManyField') {
-    //                             return;
-    //                         }
-    //                         if (queryset.map(($v) => $v.Field).indexOf(v) === -1) {
-    //                             let query,
-    //                                 $default;
-    //                             if (model[ v ].default) {
-    //                                 $default = model[ v ].default;
-    //                                 if (typeof $default === 'function') {
-    //                                     $default = $default();
-    //                                 }
-    //                             }
-    //                             query =
-    //                                 `ALTER TABLE \`${modelName}\` ADD COLUMN \`${v}\` ` +
-    //                                 `${me.types(model, v)}` +
-    //                                 `${model[ v ].nullable ? '' : ' NOT NULL'}` +
-    //                                 `${model[ v ].unique ? ' UNIQUE' : ''}` +
-    //                                 `${$default ? ` DEFAULT '${$default}'` : ''};`;
-    //                             if (!me.dryRun) {
-    //                                 proms.push(me.run(query));
-    //                             } else {
-    //                                 $LogProvider.mysqlInfo(
-    //                                     `Dry Run Query: ${gray(query)}`
-    //                                 );
-    //                             }
-    //                         }
-    //                     });
-    //                     return Promise.all(proms);
-    //                 });
-    //             }
-    //             proms.push(prom);
-    //         }
-    //         return Promise.all(proms);
-    //     }).then(function() {
-    //         me.disconnect();
-    //         $LogProvider.mysqlInfo(
-    //             `Successfully Synced & Migrated ${cyan(me.name)}`
-    //         );
-    //         p.exit(0);
-    //     });
-    // }
 }
 
 export default MySqlConnection;

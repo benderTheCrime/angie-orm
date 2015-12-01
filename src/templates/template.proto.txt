@@ -1,0 +1,8 @@
+package %s.%s;
+
+// %s
+message %s {
+
+    // I strongly recommend making all other fields optional
+    required string uuid = 1;
+}

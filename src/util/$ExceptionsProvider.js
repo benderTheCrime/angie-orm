@@ -8,22 +8,6 @@
 import { magenta, cyan } from       'chalk';
 import $LogProvider from            'angie-log';
 
-class $$InvalidConfigError extends ReferenceError {
-    constructor(name = '') {
-        $LogProvider.error(
-            `Invalid${name ? ` ${name}` : ''} configuration settings. ` +
-            'Please check your AngieFile.'
-        );
-        super();
-    }
-}
-
-class $$InvalidDatabaseConfigError extends $$InvalidConfigError {
-    constructor() {
-        super('database');
-    }
-}
-
 class $$InvalidModelConfigError extends TypeError {
     constructor(name, error = '') {
         $LogProvider.error(
@@ -52,8 +36,6 @@ class $$InvalidModelFieldReferenceError extends Error {
 }
 
 export {
-    $$InvalidConfigError,
-    $$InvalidDatabaseConfigError,
     $$InvalidModelConfigError,
     $$InvalidModelReferenceError,
     $$InvalidModelFieldReferenceError

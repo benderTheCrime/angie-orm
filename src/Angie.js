@@ -5,34 +5,35 @@
  */
 
 // System Modules
-import util from                    'util';
-import Protobuf from                'protobufjs';
-import { blue } from                'chalk';
-import $LogProvider from            'angie-log';
+import util from                                'util';
+import Protobuf from                            'protobufjs';
+import { blue } from                            'chalk';
+import $LogProvider from                        'angie-log';
 
 // Angie ORM Modules
-import BaseModel from               './models/BaseModel';
-import * as $$FieldProvider from    './models/$Fields';
-import {
-    $$InvalidModelConfigError
-} from                              './util/$ExceptionsProvider';
+import BaseModel from                           './models/BaseModel';
+import * as $$FieldProvider from                './models/$Fields';
+import { $$InvalidModelConfigError } from       './util/$ExceptionsProvider';
 
 
 // Setup the app or inherit the app from the `global` Namespace
-const p = process;
 let app = global.app;
 
 app.Model = app.model = function Model(name, Obj = {}) {
+
+    // Instantiate the Model class here
     let model = typeof Obj === 'function' ?
         new Obj($$FieldProvider) :
             typeof Obj === 'object' ? Obj : undefined;
-
     model.name = model.name || name;
 
+    // We need to try and load the associated proto!
+    const builder = Protobuf.loadProtoFile(
+        `${__dirname}/proto/${model.name}.proto`
+    );
 
-    // TODO here we have to try and instantiate the DAO instead of the base model
-    //let instance = new BaseModel(model.name);
-    let instance = {};
+    console.log('MODEL PROTO', builder);
+    let instance = new BaseModel();
 
 
 

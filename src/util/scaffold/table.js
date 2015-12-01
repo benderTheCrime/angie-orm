@@ -14,26 +14,23 @@ import $LogProvider from                'angie-log';
 
 // Project Modules
 import { default as router } from       '../../databases/router';
-import { $$ModelCreationError } from    '../../services/exceptions';
+import { $$ModelCreationError } from    '../$ExceptionsProvider';
+import { $$InvalidConfigError } from    '../../services/exceptions';
 import { $DateUtil } from               '../util';
-
-// TODO the model scaffold has to create files for:
-//      - the Angie model itself
-//      - the .proto scaffold
-
-console.log(process.cwd());
 
 const $StringUtil = $Injector.get('$StringUtil'),
     TEMPLATE_PREFIX = `${__dirname}/../../templates/template.`,
     ENCODING = 'utf8',
     PROTO_TEMPLATE = fs.readFileSync(`${TEMPLATE_PREFIX}proto.txt`, ENCODING),
-    MODEL_TEMPLATE = fs.readFileSync(`${TEMPLATE_PREFIX}model.js.txt`, ENCODING);
+    MODEL_TEMPLATE = fs.readFileSync(`${TEMPLATE_PREFIX}model.js.txt`, ENCODING),
+    TABLE_TEMPLATE = fs.readFileSync(`${TEMPLATE_PREFIX}table.sql.txt`, ENCODING);
 
 export default function() {
 
     // If the user did this correctly, there is a name
     // TODO camel and underscore this name
-    const NAME = argv._.length > 3 ? argv._[ 3 ] : argv._[ 2 ],
+    const PROJECT_NAME = app.$$config.projectName || 'Angie',
+        NAME = argv._.length > 3 ? argv._[ 3 ] : argv._[ 2 ],
         DATABASE_NAME = argv._.length > 3 ?
             argv._[ 2 ] : argv.d || argv.database || 'default';
 
@@ -41,23 +38,31 @@ export default function() {
         throw $$ModelCreationError();
     }
 
-    // TODO error if name does not exist
+    if (!PROJECT_NAME) {
+        throw new $$InvalidConfigError('projectName');
+    }
+
     const DATABASE = router(DATABASE_NAME),
         DASH_NAME = $StringUtil.toDash(NAME),
         UNDERSCORE_NAME = $StringUtil.toUnderscore(NAME),
         CAMEL_NAME = $StringUtil.toCamel(NAME),
-
-        // TODO I don't know what to do with this yet
-        PROTO_FILE = PROTO_TEMPLATE,
+        CLASS_CAMEL_NAME =
+            CAMEL_NAME.charAt(0).toUpperCase() + CAMEL_NAME.slice(1),
+        PROTO_FILE = util.format(
+            PROTO_TEMPLATE,
+            PROJECT_NAME,
+            CLASS_CAMEL_NAME,
+            UNDERSCORE_NAME,
+            CLASS_CAMEL_NAME
+        ),
         MODEL_FILE = util.format(
             MODEL_TEMPLATE,
             DASH_NAME,
-
-            // TODO fix dates
             $DateUtil.format('mm/dd/yy'),
-            CAMEL_NAME.charAt(0).toUpperCase() + CAMEL_NAME.slice(1),
+            CLASS_CAMEL_NAME,
             UNDERSCORE_NAME
         ),
+        TABLE_FILE = util.format(TABLE_TEMPLATE, DASH_NAME),
         PROTO_DIR = `${process.cwd()}/proto`,
         MODEL_DIR = `${process.cwd()}/src/models`,
         PROTO_NAME = `${DASH_NAME}.proto`,
@@ -81,7 +86,6 @@ export default function() {
     } catch(e) {}
 
     try {
-        console.log(PROTO_FILENAME, DASH_NAME);
         if (!statProto) {
             fs.writeFileSync(PROTO_FILENAME, PROTO_FILE);
         }
@@ -113,14 +117,18 @@ export default function() {
         }
     }
 
-    $LogProvider.info(`Successfully created model files for model ${NAME}`);
-    $LogProvider.info('Attempting to scaffold model in database');
+    $LogProvider.info(`Successfully created ${NAME} model files`);
+    $LogProvider.info(
+        `Attempting to create table in database ${cyan(DATABASE.database.name)}`
+    );
 
-    try {
-        console.log(DATABASE);
-    } catch(e) {}
-
-    // TODO if DB does not exist create it, or try to
-    // TODO if Table does not exist, create it, or try to
-        // TODO just one field (for now) called "data"
+    DATABASE.raw(`CREATE SCHEMA ${DATABASE.database.name}`).then(function() {
+        return DATABASE.raw(TABLE_FILE);
+    }).then(function() {
+        $LogProvider.info('Angie Model created and ready to use!');
+        process.exit(0);
+    }).catch(function(e) {
+        $LogProvider.error(e);
+        process.exit(1);
+    });
 }

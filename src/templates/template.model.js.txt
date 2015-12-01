@@ -9,7 +9,7 @@ import { Model } from     'angie-orm/src/util/decorators';
 @Model
 class %s {
     constructor($Fields) {
-        name = '%s';
+        this.name = '%s';
         // TODO create fields here
     }
 }

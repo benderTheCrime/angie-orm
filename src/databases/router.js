@@ -5,19 +5,14 @@
  */
 
 // System Modules
-import fs from                          'fs';
+import fs from                                  'fs';
 
 // Angie ORM Modules
-import MySqlConnection from             './mysql-connection';
-import {
-    $$InvalidConfigError,
-    $$InvalidDatabaseConfigError
-} from                                  '../util/$ExceptionsProvider';
+import MySqlConnection from                     './mysql-connection';
+import { $$InvalidDatabaseConfigError } from    '../services/exceptions';
 
-const p = process;
-let app = global.app,
-    dbs = {},
-    config = global.app.$$config;
+let config = global.app.$$config,
+    dbs = {};
 
 export default function(args) {
     let database,

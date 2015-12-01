@@ -5,6 +5,12 @@
  */
 
 // Angie Modules
+import $$InvalidConfigError from            './exceptions/invaild-config-error';
+import $$InvalidDatabaseConfigError from    './exceptions/invaild-database-config-error';
 import $$ModelCreationError from            './exceptions/model-creation-error';
 
-export { $$ModelCreationError };
+export {
+    $$InvalidConfigError,
+    $$InvalidDatabaseConfigError,
+    $$ModelCreationError
+};

@@ -30,9 +30,6 @@ const IGNORE_KEYS = [
 ];
 
 class BaseModel {
-    constructor(name) {
-        this.name = this.name || name;
-    }
     all(args = {}) {
         args.model = this;
 

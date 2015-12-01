@@ -1,11 +1,15 @@
-// TODO - Create table scaffold, add angie and angie orm cli commands
-// TODO figure out what secondary DB to communicate with
+// TODO fix exception error, fix project name error
+// TODO build proto file template
+// TODO automatically add UUID as a required field to PROTO
+
 // TODO protobuf files must be loaded in and registered with Model/model
 // TODO a layer of abstraction must be built on top of this
+    // TODO figure out how proto and model interact
 // TODO no migrations and the same format of models implies models largely unchanged
 // TODO don't use required
 // TODO script to run sql files - model sync for JS files
 // TODO refactor Exceptions
+
 
 
 /**
