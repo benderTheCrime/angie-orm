@@ -9,7 +9,7 @@ import $LogProvider from    'angie-log';
 
 /**
  * @desc Thrown when a name cannot be resolved on Model creation through the CLI
- * @since 1.0.0
+ * @since 0.4.0
  * @access private
  */
 class $$ModelCreationError {

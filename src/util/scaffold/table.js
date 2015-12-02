@@ -35,7 +35,7 @@ export default function() {
             argv._[ 2 ] : argv.d || argv.database || 'default';
 
     if (!NAME) {
-        throw $$ModelCreationError();
+        throw new $$ModelCreationError();
     }
 
     if (!PROJECT_NAME) {

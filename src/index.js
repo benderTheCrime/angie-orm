@@ -1,5 +1,3 @@
-// TODO fix exception error, fix project name error
-// TODO build proto file template
 // TODO automatically add UUID as a required field to PROTO
 
 // TODO protobuf files must be loaded in and registered with Model/model
@@ -18,7 +16,11 @@
  * @date 8/23/2015
  */
 
-import                                          './new-angie';
+// System Modules
+import $LogProvider from                        'angie-log';
+
+// Angie ORM Modules
+import                                          './angie';
 import { default as $$createModel } from        './util/scaffold/table';
 
 let args = [];
@@ -31,7 +33,7 @@ process.argv.forEach(function(v) {
 });
 
 // Route the CLI request to a specific command if running from CLI
-switch ((args[0] || '').toLowerCase()) {
+switch ((args[ 0 ] || '').toLowerCase()) {
     case 'create':
         $$createModel();
         break;

@@ -28,14 +28,13 @@ app.Model = app.model = function Model(name, Obj = {}) {
     model.name = model.name || name;
 
     // We need to try and load the associated proto!
+    console.log(Protobuf, `${process.cwd()}/proto/${model.name}.proto`);
     const builder = Protobuf.loadProtoFile(
         `${__dirname}/proto/${model.name}.proto`
     );
 
     console.log('MODEL PROTO', builder);
     let instance = new BaseModel();
-
-
 
     // Mock extend obj onto the instance
     if (typeof model === 'object') {
@@ -44,9 +43,7 @@ app.Model = app.model = function Model(name, Obj = {}) {
         throw new $$InvalidModelConfigError(name);
     }
 
-    this.$$register('Models', model.name, instance);
-
-    return this;
+    return this.$$register('Models', model.name, instance);;
 };
 
 app.services.$Fields = $$FieldProvider;
