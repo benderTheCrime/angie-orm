@@ -9,7 +9,7 @@ import {cyan} from                      'chalk';
 import $LogProvider from                'angie-log';
 
 // Angie Modules
-import AngieDatabaseRouter from         '../databases/AngieDatabaseRouter';
+import router from                      '../databases/router';
 import {
     $$InvalidModelFieldReferenceError
 } from                                  '../util/$ExceptionsProvider';
@@ -29,7 +29,11 @@ const IGNORE_KEYS = [
     'values'
 ];
 
+// TODO this has to serialize on behalf of MySQL
 class BaseModel {
+    constructor(proto) {
+        this.$$proto = proto;
+    }
     all(args = {}) {
         args.model = this;
 
@@ -127,15 +131,22 @@ class BaseModel {
         return this.fields;
     }
     $$prep(args = {}) {
-        const database = typeof args === 'object' && args.hasOwnProperty('database') ?
-                  args.database : null;
+        const database = typeof args === 'object' &&
+            args.hasOwnProperty('database') ? args.database : null;
 
         // This forces the router to use a specific database, DB can also be
         // forced at a model level by using this.database
-        this.$$database = AngieDatabaseRouter(
+        this.$$database = router(
             database || this.database || 'default'
         );
+
         return this.$$database;
+    }
+    $$serialize(obj) {
+        this.proto(obj).encode;
+    }
+    $$parse(obj) {
+        this.proto(obj).decode;
     }
 }
 

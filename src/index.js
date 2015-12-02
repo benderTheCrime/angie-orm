@@ -1,12 +1,11 @@
-// TODO automatically add UUID as a required field to PROTO
-
-// TODO protobuf files must be loaded in and registered with Model/model
 // TODO a layer of abstraction must be built on top of this
     // TODO figure out how proto and model interact
+    // TODO encoding and decoding must happen as a byproduct of the query/queryset
 // TODO no migrations and the same format of models implies models largely unchanged
-// TODO don't use required
+
+
 // TODO script to run sql files - model sync for JS files
-// TODO refactor Exceptions
+// TODO refactor Exceptions, refactor Util
 
 
 
