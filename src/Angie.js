@@ -16,7 +16,7 @@ import BaseModel from                           './models/BaseModel';
 import * as $$FieldProvider from                './models/$Fields';
 import { $$InvalidModelConfigError } from       './util/$ExceptionsProvider';
 import {
-    $$InvalidConfigError
+    $$InvalidConfigError,
     $$MissingProtoError
 } from                                          './services/exceptions';
 
@@ -36,10 +36,12 @@ app.Model = app.model = function Model(name, Obj = {}) {
         throw new $$InvalidConfigError('projectName');
     }
 
-    if (!MODEL.name && name) {
-        MODEL.name = name;
-    } else {
-        throw new $$InvalidModelConfigError('Unknown');
+    if (!MODEL.name) {
+        if (name) {
+            MODEL.name = name;
+        } else {
+            throw new $$InvalidModelConfigError('Unknown');
+        }
     }
 
     // We need to try and load the associated proto!

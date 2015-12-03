@@ -5,7 +5,7 @@
  */
 
 // System Modules
-import {cyan} from                      'chalk';
+import { cyan } from                    'chalk';
 import $LogProvider from                'angie-log';
 
 // Angie Modules
@@ -30,6 +30,10 @@ const IGNORE_KEYS = [
 ];
 
 // TODO this has to serialize on behalf of MySQL
+// TODO you can't fetch ids
+// TODO you can't filter out values
+// TODO you cant update, only delete and create
+// TODO filter implies selecting all and then manually checking the results
 class BaseModel {
     constructor(proto) {
         this.$$proto = proto;
@@ -43,20 +47,15 @@ class BaseModel {
     fetch(args = {}) {
         args.model = this;
 
-        // Returns a subset of rows specified with an int and a head/tail argument
-        return this.$$prep.apply(
-            this,
-            arguments
-        ).fetch(args);
+        // Returns a subset of rows specified with an int and a head/tail
+        // argument
+        return this.$$prep.apply(this, arguments).fetch(args);
     }
     filter(args = {}) {
         args.model = this;
 
         // Returns a filtered subset of rows
-        return this.$$prep.apply(
-            this,
-            arguments
-        ).filter(args);
+        return this.$$prep.apply(this, arguments).filter(args);
     }
     exists(args = {}) {
         args.model = args.model || this;
@@ -70,24 +69,27 @@ class BaseModel {
         this.database = this.$$prep.apply(this, arguments);
 
         // Make sure all of our fields are resolved
-        let createObj = {},
-            me = this;
+        // let createObj = {},
+        //     me = this;
 
-        this.$fields().forEach(function(field) {
-            let val = args[ field ] || args.model[ field ].default || null;
-            if (typeof val === 'function') {
-                val = val.call(this, args);
-            }
-            if (
-                me[ field ] &&
-                me[ field ].validate &&
-                me[ field ].validate(val)
-            ) {
-                createObj[ field ] = val;
-            } else {
-                throw new $$InvalidModelFieldReferenceError(me.name, field);
-            }
-        });
+        // TODO just let the proto do its job
+        // this.$fields().forEach(function(field) {
+        //     let val = args[ field ] || args.model[ field ].default || null;
+        //     if (typeof val === 'function') {
+        //         val = val.call(this, args);
+        //     }
+        //
+        //     // TODO mismatched field and proto types
+        //     if (
+        //         me[ field ] &&
+        //         me[ field ].validate &&
+        //         me[ field ].validate(val)
+        //     ) {
+        //         createObj[ field ] = val;
+        //     } else {
+        //         throw new $$InvalidModelFieldReferenceError(me.name, field);
+        //     }
+        // });
 
         // Once that is settled, we can call our create
         return this.database.create(args);
@@ -97,39 +99,40 @@ class BaseModel {
 
         // Check to see if a matching record exists and if not create it
         let me = this;
-        return this.exists(args).then((v) =>
-            me[ v ? 'fetch' : 'create' ](args)
-        );
+        return this.exists(args).then(v => me[ v ? 'fetch' : 'create' ](args));
     }
-    delete(args = {}) {
-        args.model = this;
 
-        // Delete a record/set of records
-        return this.$$prep.apply(
-            this,
-            arguments
-        ).delete(args);
-    }
-    query(query, args = {}) {
-        if (typeof query !== 'string') {
-            return new Promise(function() {
-                arguments[1](new Error('Invalid Query String'));
-            });
-        }
-        return this.$$prep.apply(this, args).raw(query, this);
-    }
-    $fields() {
-        this.fields = [];
-        for (let key in this) {
-            if (
-                typeof this[ key ] === 'object' &&
-                IGNORE_KEYS.indexOf(key) === -1
-            ) {
-                this.fields.push(key);
-            }
-        }
-        return this.fields;
-    }
+    // TODO delete can't be called without calling a model first
+    // delete(args = {}) {
+    //     args.model = this;
+    //
+    //     // Delete a record/set of records
+    //     return this.$$prep.apply(this, arguments).delete(args);
+    // }
+
+    // TODO I don't think you can make special queries here
+    // query(query, args = {}) {
+    //     if (typeof query !== 'string') {
+    //         return new Promise(function() {
+    //             arguments[1](new Error('Invalid Query String'));
+    //         });
+    //     }
+    //     return this.$$prep.apply(this, args).raw(query, this);
+    // }
+
+    // $fields() {
+    //     this.fields = [];
+    //     for (let key in this) {
+    //         if (
+    //             typeof this[ key ] === 'object' &&
+    //             IGNORE_KEYS.indexOf(key) === -1
+    //         ) {
+    //             this.fields.push(key);
+    //         }
+    //     }
+    //     return this.fields;
+    // }
+
     $$prep(args = {}) {
         const database = typeof args === 'object' &&
             args.hasOwnProperty('database') ? args.database : null;
@@ -143,21 +146,23 @@ class BaseModel {
         return this.$$database;
     }
     $$serialize(obj) {
-        this.proto(obj).encode;
+        return this.$$proto.encode(obj).buffer;
     }
     $$parse(obj) {
-        this.proto(obj).decode;
+
+        // TODO buffer
+        return this.$$proto.decode(obj);
     }
 }
 
-class $$InvalidRelationCrossReferenceError extends RangeError {
-    constructor(method, field) {
-        $LogProvider.error(
-            `Cannot ${method} reference on ${cyan(field.name)}: ` +
-            'No such existing record.'
-        );
-        super();
-    }
-}
+// class $$InvalidRelationCrossReferenceError extends RangeError {
+//     constructor(method, field) {
+//         $LogProvider.error(
+//             `Cannot ${method} reference on ${cyan(field.name)}: ` +
+//             'No such existing record.'
+//         );
+//         super();
+//     }
+// }
 
 export default BaseModel;

@@ -9,13 +9,11 @@ import { magenta, cyan } from       'chalk';
 import $LogProvider from            'angie-log';
 
 class $$InvalidModelConfigError {
-    constructor(name, error = '') {
-        $LogProvider.error(
-            'Invalid Model configuration for model ' +
-            `${magenta(name)} <-- ${magenta(name)}${magenta('Provider')}` +
-            `${error ? ` ${error}` : ''}`
-        );
-        throw new TypeError();
+    constructor(name) {
+        const msg = `Invalid Model configuration for model ${magenta(name)}`;
+
+        $LogProvider.error(msg);
+        throw new TypeError(msg);
     }
 }
 

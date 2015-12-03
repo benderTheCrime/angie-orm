@@ -54,19 +54,21 @@ class BaseDBConnection {
         return this._models;
     }
     all(args = {}, fetchQuery = '', filterQuery = '') {
-        if (!args.model || !args.model.name) {
+        const MODEL = args.model;
+
+        if (!(MODEL && MODEL.name)) {
             throw new $$InvalidModelReferenceError();
         }
 
-        let values = '*';
-        if (typeof args.values === 'object' && args.values.length) {
-            values = args.values;
-            if (values.indexOf('id') === -1) {
-                values.unshift('id');
-            }
-        }
+        // let values = '*';
+        // if (typeof args.values === 'object' && args.values.length) {
+        //     values = args.values;
+        //     if (values.indexOf('id') === -1) {
+        //         values.unshift('id');
+        //     }
+        // }
 
-        return `SELECT ${values} FROM ${args.model.name}` +
+        return `SELECT * FROM ${MODEL.name}` +
             `${filterQuery ? ` WHERE ${filterQuery}` : ''}` +
             `${fetchQuery ? ` ${fetchQuery}` : ''};`;
     }
@@ -136,26 +138,41 @@ class BaseDBConnection {
         return filterQuery.length ? `${filterQuery.join(' AND ')}` : '';
     }
     create(args = {}) {
+        const MODEL = args.model;
         let keys = Object.keys(args),
-            queryKeys = [],
-            values = [];
+            protoSerializedObjectValue;
 
-        if (!args.model || !args.model.name) {
+        if (!(MODEL && MODEL.name)) {
             throw new $$InvalidModelReferenceError();
         }
 
-        keys.forEach(function(key) {
-            if (IGNORE_KEYS.indexOf(key) === -1) {
-                queryKeys.push(key);
-                values.push(`'${args[key]}'`);
+        keys.forEach(k => {
+            if (IGNORE_KEYS.includes(k)) {
+                delete args[ k ];
             }
         });
 
-        return `INSERT INTO ${args.model.name} (${queryKeys.join(', ')}) ` +
-            `VALUES (${values.join(', ')});`;
+        console.log('ARGS', args);
+
+        // try {
+            protoSerializedObjectValue = MODEL.$$serialize(args);
+        // } catch(e) {
+        //    console.log('ERROR', e);
+
+            // TODO you've got to handle this really well
+            // TODO create error
+        //    throw e;
+        // }
+
+        console.log('PROTO', protoSerializedObjectValue);
+        return `INSERT INTO ${MODEL.name} (data) VALUES ("${
+            protoSerializedObjectValue
+        }");`;
     }
+
+    // TODO delete does not delete
     delete(args = {}) {
-        return `DELETE FROM ${args.model.name} WHERE ${this.$$filterQuery(args)};`;
+        // return `DELETE FROM ${args.model.name} WHERE ${this.$$filterQuery(args)};`;
     }
     update(args = {}) {
         if (!args.model || !args.model.name) {
@@ -182,6 +199,7 @@ class BaseDBConnection {
      * @returns {string} A query string to be passed to the performed query
      * @access private
      */
+    // TODO move this to another class
     $$queryInString(args = {}, key) {
         let fieldSet = [];
         if (key) {
@@ -220,23 +238,28 @@ class BaseDBConnection {
     //     });
     // }
     $$queryset(model = {}, query, rows = [], errors) {
+        console.log('ARGS', arguments);
         const queryset = new AngieDBObject(this, model, query);
-        let results = [],
-            manyToManyFieldNames = [],
-            rels = [],
-            relFieldNames = {},
-            relArgs = {},
-            proms = [];
+        let results = [];
+            // manyToManyFieldNames = [],
+            // rels = [],
+            // relFieldNames = {},
+            // relArgs = {},
+            // proms = [];
 
-        for (let key in model) {
-            let field = model[ key ];
-            if (field.type && field.type === 'ManyToManyField') {
-                manyToManyFieldNames.push(key);
-            }
-        }
+        // for (let key in model) {
+        //     let field = model[ key ];
+        //     if (field.type && field.type === 'ManyToManyField') {
+        //         manyToManyFieldNames.push(key);
+        //     }
+        // }
+
+        try {
 
         if (rows instanceof Array) {
-            rows.forEach(function(v) {
+
+            // TODO you've got to handle this parsing better
+            rows.map(v => v.data ? model.$$parse(v.data) : null).forEach(v => {
 
                 // Create a copy to be added to the raw results set
                 let $v = util._extend({}, v);
@@ -245,45 +268,47 @@ class BaseDBConnection {
                 // updated
                 v.update = queryset.$$update.bind(queryset, v);
 
-                for (let key of manyToManyFieldNames) {
-                    const field = model[ key ],
-                          many = v[ key ] = {};
-                    for (let method of [ 'add', 'remove' ]) {
-                        many[ method ] =
-                            queryset.$$addOrRemove.bind(
-                                queryset,
-                                method,
-                                field,
-                                v.id
-                            );
-                    }
-                    for (let method of [ 'all', 'fetch', 'filter' ]) {
-                        many[ method ] = queryset.$$readMethods.bind(
-                            queryset,
-                            method,
-                            field,
-                            v.id
-                        );
-                    }
-                }
+                // for (let key of manyToManyFieldNames) {
+                //     const field = model[ key ],
+                //           many = v[ key ] = {};
+                //     for (let method of [ 'add', 'remove' ]) {
+                //         many[ method ] =
+                //             queryset.$$addOrRemove.bind(
+                //                 queryset,
+                //                 method,
+                //                 field,
+                //                 v.id
+                //             );
+                //     }
+                //     for (let method of [ 'all', 'fetch', 'filter' ]) {
+                //         many[ method ] = queryset.$$readMethods.bind(
+                //             queryset,
+                //             method,
+                //             field,
+                //             v.id
+                //         );
+                //     }
+                // }
 
                 // Find all of the foreign key fields
-                for (let key in v) {
-                    const field = model[ key ];
-                    if (field && (
-                            field.nesting === true ||
-                            field.deepNesting === true
-                        )
-                    ) {
-                        rels.push(field.rel);
-                        relFieldNames[ field.rel ] = key;
-                        relArgs[ field.rel ] = rows.map((v) => v.id);
-                    }
-                }
+                // for (let key in v) {
+                //     const field = model[ key ];
+                //     if (field && (
+                //             field.nesting === true ||
+                //             field.deepNesting === true
+                //         )
+                //     ) {
+                //         rels.push(field.rel);
+                //         relFieldNames[ field.rel ] = key;
+                //         relArgs[ field.rel ] = rows.map((v) => v.id);
+                //     }
+                // }
 
                 results.push($v);
             });
         }
+
+    } catch(e) { console.log(e); }
 
         // Add update method to row set so that the whole queryset can be
         // updated
@@ -295,44 +320,44 @@ class BaseDBConnection {
         delete queryset.$$readMethods;
 
         // Instantiate a promise for each of the foreign key fields in the query
-        rels.forEach(function(v) {
+        // rels.forEach(function(v) {
+        //
+        //     // Reference the relative object
+        //     proms.push(global.app.Models[ v ].filter({
+        //         database: model.$$database.name,
+        //         id: relArgs[ v ]
+        //     }).then(function(queryset) {
+        //
+        //         // Add errors to queryset errors
+        //         if (errors === null) {
+        //             errors = [];
+        //         }
+        //
+        //         // Add any errors to the queryset
+        //         errors.push(queryset.errors);
+        //
+        //         rows.forEach(function(row, i) {
+        //             queryset.forEach(function(queryrow) {
+        //                 if (
+        //                     !isNaN(+row[ relFieldNames[ v ] ]) &&
+        //                     queryrow.hasOwnProperty('id') &&
+        //                     row[ relFieldNames[ v ] ] === queryrow.id
+        //                 ) {
+        //
+        //                     // Assign the nested row
+        //                     results[ i ][ relFieldNames[ v ] ] =
+        //                         queryset.results[ i ];
+        //                     row[ relFieldNames[ v ] ] = queryrow;
+        //                 } else {
+        //                     results[ i ][ relFieldNames[ v ] ] =
+        //                         row[ relFieldNames[ v ] ] = null;
+        //                 }
+        //             });
+        //         });
+        //     }));
+        // });
 
-            // Reference the relative object
-            proms.push(global.app.Models[ v ].filter({
-                database: model.$$database.name,
-                id: relArgs[ v ]
-            }).then(function(queryset) {
-
-                // Add errors to queryset errors
-                if (errors === null) {
-                    errors = [];
-                }
-
-                // Add any errors to the queryset
-                errors.push(queryset.errors);
-
-                rows.forEach(function(row, i) {
-                    queryset.forEach(function(queryrow) {
-                        if (
-                            !isNaN(+row[ relFieldNames[ v ] ]) &&
-                            queryrow.hasOwnProperty('id') &&
-                            row[ relFieldNames[ v ] ] === queryrow.id
-                        ) {
-
-                            // Assign the nested row
-                            results[ i ][ relFieldNames[ v ] ] =
-                                queryset.results[ i ];
-                            row[ relFieldNames[ v ] ] = queryrow;
-                        } else {
-                            results[ i ][ relFieldNames[ v ] ] =
-                                row[ relFieldNames[ v ] ] = null;
-                        }
-                    });
-                });
-            }));
-        });
-
-        return Promise.all(proms).then(function() {
+        // return Promise.all(proms).then(function() {
 
             // Resolves to a value in the connections currently
             return util._extend(
@@ -350,17 +375,19 @@ class BaseDBConnection {
                 },
                 queryset
             );
-        });
+        // });
     }
-    $$name(modelName) {
-        modelName = modelName.replace(/([A-Z])/g, '_$1').toLowerCase();
-        if (modelName.charAt(0) === '_') {
-            modelName = modelName.slice(1, modelName.length);
-        }
-        return modelName;
-    }
+
+    // $$name(modelName) {
+    //     modelName = modelName.replace(/([A-Z])/g, '_$1').toLowerCase();
+    //     if (modelName.charAt(0) === '_') {
+    //         modelName = modelName.slice(1, modelName.length);
+    //     }
+    //     return modelName;
+    // }
 }
 
+// TODO move this to another class
 class AngieDBObject {
     constructor(database, model, query = '') {
         if (!database || !model) {
@@ -444,6 +471,7 @@ class AngieDBObject {
     }
 }
 
+// TODO move this to exceptions
 class $$DatabaseConnectivityError extends Error {
     constructor(database) {
         let message;
