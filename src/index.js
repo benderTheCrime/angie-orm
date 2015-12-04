@@ -1,3 +1,4 @@
+// TODO working on decoding
 // TODO a layer of abstraction must be built on top of this
     // TODO figure out how proto and model interact
     // TODO encoding and decoding must happen as a byproduct of the query/queryset

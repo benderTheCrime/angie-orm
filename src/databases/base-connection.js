@@ -259,7 +259,12 @@ class BaseDBConnection {
         if (rows instanceof Array) {
 
             // TODO you've got to handle this parsing better
-            rows.map(v => v.data ? model.$$parse(v.data) : null).forEach(v => {
+            rows.map(function(row) {
+                if (row.hasOwnProperty('data')) {
+                    return model.$$parse(row.data);
+                }
+                return row;
+            }).forEach(function(v) {
 
                 // Create a copy to be added to the raw results set
                 let $v = util._extend({}, v);
