@@ -24,7 +24,15 @@ import {
 // Setup the app or inherit the app from the `global` Namespace
 let app = global.app;
 
-app.Model = app.model = function Model(name, Obj = {}) {
+app.services.$Fields = $$FieldProvider;
+app.$$registry.$Fields = 'services';
+app = app.extend({
+    Model,
+    model: Model,
+    Models: {}
+});
+
+function Model(name, Obj = {}) {
 
     // Instantiate the Model class here
     const PROJECT_NAME = app.$$config.projectName,
@@ -60,8 +68,6 @@ app.Model = app.model = function Model(name, Obj = {}) {
         throw new $$MissingProtoError(MODEL.name)
     }
 
-    console.log('MODEL PROTO', PROTO);
-
     // Mock extend obj onto the instance
     if (typeof MODEL === 'object') {
         instance = util._extend(instance, MODEL);
@@ -71,7 +77,3 @@ app.Model = app.model = function Model(name, Obj = {}) {
 
     return this.$$register('Models', MODEL.name, instance);
 };
-
-app.services.$Fields = $$FieldProvider;
-app.$$registry.$Fields = 'services';
-app.Models = {};

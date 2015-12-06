@@ -138,67 +138,6 @@ class KeyField extends IntegerField {
     }
 }
 
-class ForeignKeyField extends KeyField {
-    constructor(rel, args) {
-        super(args);
-
-        this.type = 'ForeignKeyField';
-
-        if (!rel || !global.app.Models[ rel ]) {
-            throw new $$InvalidFieldConfigError(
-                this.type,
-                `Invalid relative model ${rel ? `${cyan(rel)} ` : ''}` +
-                'in constrained field declaration'
-            );
-        }
-
-        this.nesting = this.deepNesting = false;
-        if (args && typeof args === 'object') {
-
-            if (args.hasOwnProperty('deepNesting')) {
-                this.nesting = this.deepNesting = true;
-            } else {
-                this.nesting = args.hasOwnProperty('nesting');
-            }
-        }
-        this.rel = rel;
-        this.type = 'ForeignKeyField';
-    }
-}
-
-class ManyToManyField extends ForeignKeyField {
-    constructor(rel, args = {}) {
-        super(rel, args);
-
-        this.type = 'ManyToManyField';
-        this.unique = false;
-
-        this.name = args.alias || args.name;
-        if (!this.name) {
-            throw new $$InvalidFieldConfigError(
-                this.type,
-                `${cyan(`${this.type}s`)} require name to be included in ` +
-                'configuration and to be valid model'
-            );
-        }
-
-        // Setup a reference to the relationship model
-        this.crossReferenceTableId = args.tableName || `${this.name}_${this.rel}_id`;
-        if (!args.crossReferenceTable) {
-            global.app.Model(this.crossReferenceTableId, {
-                [ `${this.name}_id` ]: new KeyField(),
-                [ `${this.rel}_id` ]: new KeyField()
-            });
-            this.crossReferenceTable = global.app.Models[
-                this.crossReferenceTableId
-            ];
-        } else {
-            this.crossReferenceTableId = args.crossReferenceTableId;
-            this.crossReferenceTable = args.crossReferenceTable;
-        }
-    }
-}
-
 class $$InvalidFieldConfigError extends TypeError {
     constructor(type, error = '') {
         $LogProvider.error(

@@ -1,14 +1,17 @@
-// TODO working on decoding
 // TODO a layer of abstraction must be built on top of this
-    // TODO figure out how proto and model interact
-    // TODO encoding and decoding must happen as a byproduct of the query/queryset
-// TODO no migrations and the same format of models implies models largely unchanged
+    // TODO filter querysets have to be performed after decodes
+        // TODO fetch and filter, filter and fetch are called downstream of all
 
+
+// TODO delete
 // TODO no such thing as update, only create (delete old)
 
 // TODO script to run sql files - model sync for JS files
-// TODO refactor Exceptions, refactor Util
-// TODO add other keys?
+// TODO refactor Exceptions, refactor Util, error in base-connection
+// TODO move fields and field errors to separate files
+// TODO move the db object
+// TODO change all instances of run to $$run
+// TODO add other keys - ability to set indices
 // TODO remove this.database references in basemodel, remove, "run" in connections
 
 /**
@@ -52,5 +55,4 @@ switch ((args[ 0 ] || '').toLowerCase()) {
                 $LogProvider.info(std);
             }
         });
-        break;
 }

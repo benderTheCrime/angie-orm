@@ -18,9 +18,13 @@ Angie ORM is a feature-complete database relationship manager designed for NodeJ
 Note: As of version `1.0.0` this package only works with Angie Framework applications and only works with. Protocol Buffers. If you would like to use Sqlite or full MySQL you can continue to use a legacy version of this package. If you would like to use a different database you can develop package support by mimicking the way this package communicates with protocol buffers.
 
 ### Usage
-To use the Angie ORM, you must first install Protocol Buffers. Angie uses Protocol Buffers to handle serializing and parsing binary data associated with data objects. It stores those objects in MySQL and uses MySQL to manage the relationships in between those objects.
+To use the Angie ORM, you must first install Protocol Buffers and MySQL. Angie uses Protocol Buffers to handle serializing and parsing binary data associated with data objects. It stores those objects in MySQL and uses MySQL to manage the relationships in between those objects.
 
 There is no concept of migrations, however, one may write a config script that only executes in the event it has not already been run on application start.
+
+#### Some Important Concepts:
+* There are no updates, only inserts! You can "delete," but it is just flagging a record deleted.
+* There are no ManyToMany relationships! there are only cross OneToOne nested relationships.
 
 #### Install Protocol Buffers:
 * Download Protocol Buffers from here: https://developers.google.com/protocol-buffers/docs/downloads

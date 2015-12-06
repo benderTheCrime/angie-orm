@@ -5,6 +5,7 @@
  */
 
 // System Modules
+import util from                                'util';
 import mysql from                               'mysql';
 import {
     cyan,
@@ -47,36 +48,6 @@ class MySqlConnection extends BaseDBConnection {
             this.connected = false;
         }
     }
-
-    // TODO we no longer need to resolve the type of field
-    // types(model, key) {
-    //     const field = model[ key ];
-    //     let type = field.type,
-    //         maxLength = '';
-    //     if (!type) {
-    //         return;
-    //     }
-    //     if (field.maxLength) {
-    //         maxLength = `(${field.maxLength})`;
-    //     }
-    //     switch (type) {
-    //         case 'CharField':
-    //             return `VARCHAR${maxLength}`;
-    //
-    //         // TODO support different size integers: TINY, SMALL, MEDIUM
-    //         case 'IntegerField':
-    //             return `INTEGER${maxLength}`;
-    //         case 'KeyField':
-    //             return `INTEGER${maxLength}`;
-    //         case 'ForeignKeyField':
-    //             return `INTEGER${maxLength}, ADD CONSTRAINT fk_${key} ` +
-    //                 `FOREIGN KEY(${key}) REFERENCES ${field.rel}(id) ON ` +
-    //                 `DELETE CASCADE`;
-    //         default:
-    //             return undefined;
-    //     }
-    // }
-
     connect() {
         let me = this;
         return new Promise(function(resolve) {
@@ -96,12 +67,13 @@ class MySqlConnection extends BaseDBConnection {
             resolve();
         });
     }
+
+    // TODO Does this even matter
     disconnect() {
         this.connection.end();
         this.connected = false;
     }
-
-    run(query, model) {
+    run(model, query) {
         let me = this,
             name = this.name;
         return this.connect().then(function() {
@@ -111,34 +83,37 @@ class MySqlConnection extends BaseDBConnection {
                     if (e) {
                         $LogProvider.warn(e);
                     }
+
+                    // TODO does this belong here?
+                    for (let row of rows) {
+                        row = util._extend({
+                            id: row.id,
+                            created: row.created
+                        }, model.$$parse(row.data));
+                    }
+
                     resolve([ rows, e ]);
                 });
             });
         }).then(function(args) {
-            return me.$$queryset(model, query, args[0], args[1]);
+            return me.$$queryset(model, query, ...args);
         });
     }
     all() {
-        const query = super.all.apply(this, arguments);
-        return this.run(query, arguments[0].model);
+        const MODEL = arguments[ 0 ].model,
+            QUERY = super.all.apply(this, arguments);
+        return this.run(MODEL, QUERY);
     }
     create() {
-        const query = super.create.apply(this, arguments);
-        return this.run(query, arguments[0].model);
+        const MODEL = arguments[ 0 ].model,
+            QUERY = super.create.apply(this, arguments);
+        return this.run(MODEL, QUERY);
     }
     delete() {
-        const query = super.delete.apply(this, arguments);
-        return this.run(query, arguments[0].model);
+        const MODEL = arguments[ 0 ].model,
+            QUERY = super.delete.apply(this, arguments);
+        return this.run(MODEL, QUERY);
     }
-    update() {
-        const query = super.update.apply(this, arguments);
-        return this.run(query, arguments[0].model);
-    }
-
-    // TODO I don't think we need this
-    // raw(query, model) {
-    //     return this.run(query, model);
-    // }
 }
 
 export default MySqlConnection;

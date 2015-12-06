@@ -5,6 +5,7 @@
  */
 
 // System Modules
+import util from                        'util';
 import { cyan } from                    'chalk';
 import $LogProvider from                'angie-log';
 
@@ -36,64 +37,54 @@ const IGNORE_KEYS = [
 // TODO filter implies selecting all and then manually checking the results
 class BaseModel {
     constructor(proto) {
-        this.$$proto = proto;
+        this.$$Proto = proto;
     }
     all(args = {}) {
-        args.model = this;
 
         // Returns all of the rows
-        return this.$$prep.apply(this, arguments).all(args);
+        return this.$$prep
+            .apply(this, util._extend({ model: this }, arguments))
+            .all(args);
     }
     fetch(args = {}) {
-        args.model = this;
+        let me = this;
 
         // Returns a subset of rows specified with an int and a head/tail
         // argument
-        return this.$$prep.apply(this, arguments).fetch(args);
+        return this.$$prep
+            .apply(this, util._extend({ model: this }, arguments))
+            .all(args).then(function(queryset) {
+                return queryset;
+            });
     }
     filter(args = {}) {
-        args.model = this;
 
         // Returns a filtered subset of rows
-        return this.$$prep.apply(this, arguments).filter(args);
-    }
-    exists(args = {}) {
-        args.model = args.model || this;
-        return this.filter.apply(this, arguments).then(function(queryset) {
-            return !!queryset[0];
-        });
+        return this.$$prep
+            .apply(this, util._extend({ model: this }, arguments))
+            .filter(args);
     }
     create(args = {}) {
-        args.model = this;
-
-        this.database = this.$$prep.apply(this, arguments);
-
-        // Make sure all of our fields are resolved
-        // let createObj = {},
-        //     me = this;
-
-        // TODO just let the proto do its job
-        // this.$fields().forEach(function(field) {
-        //     let val = args[ field ] || args.model[ field ].default || null;
-        //     if (typeof val === 'function') {
-        //         val = val.call(this, args);
-        //     }
-        //
-        //     // TODO mismatched field and proto types
-        //     if (
-        //         me[ field ] &&
-        //         me[ field ].validate &&
-        //         me[ field ].validate(val)
-        //     ) {
-        //         createObj[ field ] = val;
-        //     } else {
-        //         throw new $$InvalidModelFieldReferenceError(me.name, field);
-        //     }
-        // });
-
-        // Once that is settled, we can call our create
-        return this.database.create(args);
+        return this.$$prep
+            .apply(this, util._extend({ model: this }, arguments))
+            .create(args);
     }
+
+    // TODO delete can't be called without calling a model first, need the id
+    // delete(args = {}) {
+    //     args.model = this;
+    //
+    //     // Delete a record/set of records
+    //     return this.$$prep.apply(this, arguments).delete(args);
+    // }
+    exists(args = {}) {
+        args.model = args.model || this;
+        return this.filter
+            .apply(this, arguments)
+            .then(queryset => !!queryset[ 0 ]);
+    }
+
+    // TODO this is an ill-advised intensive operation
     $createUnlessExists(args = {}) {
         args.model = this;
 
@@ -101,37 +92,6 @@ class BaseModel {
         let me = this;
         return this.exists(args).then(v => me[ v ? 'fetch' : 'create' ](args));
     }
-
-    // TODO delete can't be called without calling a model first
-    // delete(args = {}) {
-    //     args.model = this;
-    //
-    //     // Delete a record/set of records
-    //     return this.$$prep.apply(this, arguments).delete(args);
-    // }
-
-    // TODO I don't think you can make special queries here
-    // query(query, args = {}) {
-    //     if (typeof query !== 'string') {
-    //         return new Promise(function() {
-    //             arguments[1](new Error('Invalid Query String'));
-    //         });
-    //     }
-    //     return this.$$prep.apply(this, args).raw(query, this);
-    // }
-
-    // $fields() {
-    //     this.fields = [];
-    //     for (let key in this) {
-    //         if (
-    //             typeof this[ key ] === 'object' &&
-    //             IGNORE_KEYS.indexOf(key) === -1
-    //         ) {
-    //             this.fields.push(key);
-    //         }
-    //     }
-    //     return this.fields;
-    // }
 
     $$prep(args = {}) {
         const database = typeof args === 'object' &&
@@ -146,23 +106,22 @@ class BaseModel {
         return this.$$database;
     }
     $$serialize(obj) {
-        return this.$$proto.encode(obj).buffer;
+        return this.$$Proto.encode(obj);
     }
     $$parse(obj) {
 
         // TODO buffer
-        return this.$$proto.decode(obj);
+        try {
+            return this.$$Proto.decode(obj);
+        } catch(e) {
+            if (e.decoded) {
+                return e.decoded;
+            } else {
+                throw e;
+            }
+        }
+
     }
 }
-
-// class $$InvalidRelationCrossReferenceError extends RangeError {
-//     constructor(method, field) {
-//         $LogProvider.error(
-//             `Cannot ${method} reference on ${cyan(field.name)}: ` +
-//             'No such existing record.'
-//         );
-//         super();
-//     }
-// }
 
 export default BaseModel;
