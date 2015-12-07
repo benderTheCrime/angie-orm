@@ -122,8 +122,8 @@ export default function() {
         `Attempting to create table in database ${cyan(DATABASE.database.name)}`
     );
 
-    DATABASE.raw(`CREATE SCHEMA ${DATABASE.database.name}`).then(function() {
-        return DATABASE.raw(TABLE_FILE);
+    DATABASE.run(`CREATE SCHEMA ${DATABASE.database.name}`).then(function() {
+        return DATABASE.run(TABLE_FILE);
     }).then(function() {
         $LogProvider.info('Angie Model created and ready to use!');
         process.exit(0);

@@ -6,7 +6,10 @@
 
 // System Modules
 import util from                'util';
-import {magenta, cyan} from     'chalk';
+import {
+    magenta,
+    cyan
+} from                          'chalk';
 import $LogProvider from        'angie-log';
 
 const p = process;
@@ -45,22 +48,6 @@ class BaseField {
                 unique,
                 $default
             ];
-        }
-    }
-    create() {
-
-        // TODO this method is not responsible for migrating a model, only
-        // creating a field in a record when the model is instantiated
-        if (this.default) {
-            if (this.validate(this.default)) {
-                this.value = typeof this.default === 'function' ? this.default() :
-                    this.default;
-            } else {
-                throw new $$InvalidFieldConfigError(
-                    this.type,
-                    'Invalid default value'
-                );
-            }
         }
     }
     validate(value) {
@@ -152,6 +139,5 @@ class $$InvalidFieldConfigError extends TypeError {
 export {
     CharField,
     IntegerField,
-    ForeignKeyField,
-    ManyToManyField
+    KeyField
 };

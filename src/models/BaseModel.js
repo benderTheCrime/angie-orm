@@ -30,7 +30,6 @@ const IGNORE_KEYS = [
     'values'
 ];
 
-// TODO this has to serialize on behalf of MySQL
 // TODO you can't fetch ids
 // TODO you can't filter out values
 // TODO you cant update, only delete and create
@@ -40,57 +39,35 @@ class BaseModel {
         this.$$Proto = proto;
     }
     all(args = {}) {
-
-        // Returns all of the rows
-        return this.$$prep
-            .apply(this, util._extend({ model: this }, arguments))
-            .all(args);
+        args = util._extend({ model: this }, args);
+        return this.$$prep.apply(this, args).all(args);
     }
     fetch(args = {}) {
-        let me = this;
-
-        // Returns a subset of rows specified with an int and a head/tail
-        // argument
-        return this.$$prep
-            .apply(this, util._extend({ model: this }, arguments))
-            .all(args).then(function(queryset) {
-                return queryset;
-            });
+        args = util._extend({ model: this }, args);
+        return this.$$prep.apply(this, args).fetch(args);
     }
     filter(args = {}) {
-
-        // Returns a filtered subset of rows
-        return this.$$prep
-            .apply(this, util._extend({ model: this }, arguments))
-            .filter(args);
+        args = util._extend({ model: this }, args);
+        return this.$$prep.apply(this, args).filter(args);
     }
     create(args = {}) {
-        return this.$$prep
-            .apply(this, util._extend({ model: this }, arguments))
-            .create(args);
+        args = util._extend({ model: this }, args);
+        return this.$$prep.apply(this, args).create(args);
     }
-
-    // TODO delete can't be called without calling a model first, need the id
-    // delete(args = {}) {
-    //     args.model = this;
-    //
-    //     // Delete a record/set of records
-    //     return this.$$prep.apply(this, arguments).delete(args);
-    // }
     exists(args = {}) {
-        args.model = args.model || this;
         return this.filter
-            .apply(this, arguments)
+            .apply(this, util._extend({ model: this }, args))
             .then(queryset => !!queryset[ 0 ]);
     }
 
     // TODO this is an ill-advised intensive operation
     $createUnlessExists(args = {}) {
-        args.model = this;
+        args = util._extend({ model: this }, args);
 
         // Check to see if a matching record exists and if not create it
-        let me = this;
-        return this.exists(args).then(v => me[ v ? 'fetch' : 'create' ](args));
+        return this.exists
+            .apply(this, args)
+            .then(v => this[ v ? 'fetch' : 'create' ](args));
     }
 
     $$prep(args = {}) {
@@ -99,11 +76,7 @@ class BaseModel {
 
         // This forces the router to use a specific database, DB can also be
         // forced at a model level by using this.database
-        this.$$database = router(
-            database || this.database || 'default'
-        );
-
-        return this.$$database;
+        return this.$$database = router(database || this.database || 'default');
     }
     $$serialize(obj) {
         return this.$$Proto.encode(obj);

@@ -26,7 +26,7 @@ let app = global.app;
 
 app.services.$Fields = $$FieldProvider;
 app.$$registry.$Fields = 'services';
-app = app.extend({
+app = util._extend(app, {
     Model,
     model: Model,
     Models: {}

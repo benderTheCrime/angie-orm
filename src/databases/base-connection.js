@@ -29,7 +29,9 @@ const IGNORE_KEYS = [
     'update',
     'first',
     'last',
-    'values'
+    'values',
+    'id',
+    'created'
 ];
 
 /**
@@ -72,62 +74,62 @@ class BaseDBConnection {
         return this.all(args, fetchQuery);
     }
     filter(args = {}) {
-        return this.fetch(args).then(function(queryset) {
-            const OPERATOR_REGEXP = /^((<|>)=?)[^><]+$/g,
-                SIM = v => v.indexOf(v.replace('~', '')) > - 1;
+        return (this.result ? Promise.resolve(this) : this.fetch(args))
+            .then(queryset => {
+                const OPERATOR_REGEXP = /^((<|>)=?)[^><]+$/g,
+                    SIM = v => v.indexOf(v.replace('~', '')) > - 1;
 
-            for (let key in args) {
-                let value = args[ key ];
-                if (IGNORE_KEYS.indexOf(key) > -1) {
-                    continue;
-                } else if (v.indexOf('~') > -1) {
-                    const SIM = v => v.indexOf(value.replace('~', '')) > - 1;
+                for (let key in args) {
+                    let value = args[ key ];
+                    if (IGNORE_KEYS.indexOf(key) > -1) {
+                        continue;
+                    } else if (v.indexOf('~') > -1) {
+                        const SIM = v => v.indexOf(value.replace('~', '')) > - 1;
 
-                    queryset.results = queryset.results.filter(SIM);
-                    queryset.rows = queryset.rows.filter(SIM);
-                } else if (OPERATOR_REGEXP.test(value)) {
+                        queryset.results = queryset.results.filter(SIM);
+                        queryset.rows = queryset.rows.filter(SIM);
+                    } else if (OPERATOR_REGEXP.test(value)) {
 
-                    // TODO check types
-                    const PLAIN_VALUE = value.replace(OPERATOR_REGEXP, '');
+                        // TODO check types
+                        const PLAIN_VALUE = value.replace(OPERATOR_REGEXP, '');
 
-                    switch (value.match(OPERATOR_REGEXP)[ 0 ]) {
-                        case '>=':
-                            const GTE = v => v >= PLAIN_VALUE;
+                        switch (value.match(OPERATOR_REGEXP)[ 0 ]) {
+                            case '>=':
+                                const GTE = v => v >= PLAIN_VALUE;
 
-                            queryset.results = queryset.results.filter(GTE);
-                            queryset.rows = queryset.rows.filter(GTE);
-                            break;
-                        case '<=':
-                            const LTE = v => v <= PLAIN_VALUE;
+                                queryset.results = queryset.results.filter(GTE);
+                                queryset.rows = queryset.rows.filter(GTE);
+                                break;
+                            case '<=':
+                                const LTE = v => v <= PLAIN_VALUE;
 
-                            queryset.results = queryset.results.filter(GTE);
-                            queryset.rows = queryset.rows.filter(GTE);
-                            break;
-                        case '>':
-                            const GT = v => v > PLAIN_VALUE;
+                                queryset.results = queryset.results.filter(GTE);
+                                queryset.rows = queryset.rows.filter(GTE);
+                                break;
+                            case '>':
+                                const GT = v => v > PLAIN_VALUE;
 
-                            queryset.results = queryset.results.filter(GT);
-                            queryset.rows = queryset.rows.filter(GT);
+                                queryset.results = queryset.results.filter(GT);
+                                queryset.rows = queryset.rows.filter(GT);
 
-                            break;
-                        case '<':
-                            const LT = v => v < PLAIN_VALUE;
+                                break;
+                            case '<':
+                                const LT = v => v < PLAIN_VALUE;
 
-                            queryset.results = queryset.results.filter(LT);
-                            queryset.rows = queryset.rows.filter(LT);
+                                queryset.results = queryset.results.filter(LT);
+                                queryset.rows = queryset.rows.filter(LT);
+                        }
+                    } else {
+                        const EQUAL = v => v === value;
+
+                        queryset.results = queryset.results.filter(EQUAL);
+                        queryset.rows = queryset.rows.filter(EQUAL);
                     }
-                } else {
-                    const EQUAL = v => v === value;
-
-                    queryset.results = queryset.results.filter(EQUAL);
-                    queryset.rows = queryset.rows.filter(EQUAL);
                 }
-            }
-        });
+            });
     }
     create(args = {}) {
-        const MODEL = args.model,
-            KEYS = Object.keys(args);
+        const MODEL = args.model;
         let protoObjectValue,
             protoSerializedObjectValue;
 
@@ -135,11 +137,13 @@ class BaseDBConnection {
             throw new $$InvalidModelReferenceError();
         }
 
-        KEYS.forEach(k => {
-            if (IGNORE_KEYS.includes(k)) {
-                delete args[ k ];
-            }
+        console.log('ARGS 1', args);
+
+        IGNORE_KEYS.forEach(function(k) {
+            delete args[ k ];
         });
+
+        console.log('ARGS 2', args);
 
         protoObjectValue = new MODEL.$$Proto(args);
         protoSerializedObjectValue =
@@ -156,24 +160,24 @@ class BaseDBConnection {
 
         if (rows instanceof Array) {
             rows.forEach(function(v) {
+                const ROW = util._extend({}, v);
 
                 // Add update method to row to allow the single row to be
                 // updated
-                v.update = queryset.update.bind(queryset, v);
-                v.delete = queryset.delete.bind(queryset, v);
+                v.update = queryset.update.bind(queryset, ROW);
+                v.delete = queryset.delete.bind(queryset, ROW);
 
                 // Create a copy to be added to the raw results set
-                results.push(util._extend({}, v));
+                results.push(ROW);
             });
         }
 
         // Add update method to row set so that the whole queryset can be
         // updated
         // TODO use extend?
-        rows.fetch = queryset.fetch.bind(queryset, rows);
-        rows.filter = queryset.filter.bind(queryset, rows);
-        rows.update = queryset.update.bind(queryset, rows);
-        rows.delete = queryset.delete.bind(queryset, rows);
+        rows.filter = queryset.filter.bind(queryset, results);
+        rows.update = queryset.update.bind(queryset, results);
+        rows.delete = queryset.delete.bind(queryset, results);
 
         return util._extend(
             rows,
@@ -199,28 +203,33 @@ class AngieDBObject {
         this.model = model;
         this.query = query;
     }
+    filter(rows = [], args = {}) {
+        return this.database.filter(this, args);
+    }
     update(rows, args = {}) {
         rows = rows instanceof Array ? rows : [ rows ];
         args.database = this.database;
 
+        console.log('ARGS 0', rows, args);
+
         let me = this;
 
-        keys.forEach(k => {
-            if (IGNORE_KEYS.includes(k)) {
-                delete args[ k ];
-            }
+        IGNORE_KEYS.forEach(function(k) {
+            delete args[ k ];
         });
 
         return this.delete(rows).then(function() {
             let proms = [];
 
-            return Promise.all(rows.map(v => me.model.create(me.row, args)))
+            console.log('AFTER D');
+
+            return Promise.all(rows.map(v => { console.log(v, args, util._extend(v, args)); return me.model.create(util._extend(v, args)); }))
                 .then(function(querysets) {
                     const ROWS = Array.prototype.concat
                         .apply([], querysets.map(v => v.results));
 
                     // TODO map all of the newly created rows
-                    return me.$$queryset(me.model, '', ROWS, []);
+                    return me.database.$$queryset(me.model, '', ROWS, []);
                 });
         });
     }
@@ -229,8 +238,8 @@ class AngieDBObject {
 
         const IDS = rows.map(v => v.id).join(','),
             QUERY = `UPDATE ${
-                this.name
-            } SET \`deleted\` = 1 WHERE \`id\` in (${ids});`
+                this.model.name
+            } SET \`deleted\` = 1 WHERE \`id\` in (${IDS});`
 
         return this.database.run(this.model, QUERY);
     }

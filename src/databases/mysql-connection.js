@@ -84,15 +84,14 @@ class MySqlConnection extends BaseDBConnection {
                         $LogProvider.warn(e);
                     }
 
-                    // TODO does this belong here?
-                    for (let row of rows) {
-                        row = util._extend({
-                            id: row.id,
-                            created: row.created
-                        }, model.$$parse(row.data));
+                    if (typeof rows.map !== 'function') {
+                        rows = [];
                     }
 
-                    resolve([ rows, e ]);
+                    // TODO does this belong here?
+                    resolve([ rows.map(v => util._extend({
+                        id: v.id, created: v.created
+                    }, model.$$parse(v.data))), e ]);
                 });
             });
         }).then(function(args) {
