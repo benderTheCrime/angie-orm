@@ -18,21 +18,24 @@ import {
 
 // Keys we do not necessarily want to parse as query arguments
 const IGNORE_KEYS = [
-    'database',
-    '$$database',
-    'model',
-    'name',
-    'fields',
-    'tail',
-    'head',
-    'rows',
-    'update',
-    'first',
-    'last',
-    'values',
-    'id',
-    'created'
-];
+        'database',
+        '$$database',
+        'model',
+        'name',
+        'fields',
+        'tail',
+        'head',
+        'rows',
+        'update',
+        'first',
+        'last',
+        'values',
+        'id',
+        'created',
+        'query',
+        'results'
+    ],
+    OPERATOR_REGEXP = /^((<|>)=?)[^><]+$/g;
 
 /**
  * @desc BaseDBConnection is a private class which is not exposed to the Angie
@@ -73,60 +76,62 @@ class BaseDBConnection {
               fetchQuery = `ORDER BY id ${ORD}${int ? ` LIMIT ${int}` : ''}`;
         return this.all(args, fetchQuery);
     }
-    filter(args = {}) {
-        return (this.result ? Promise.resolve(this) : this.fetch(args))
-            .then(queryset => {
-                const OPERATOR_REGEXP = /^((<|>)=?)[^><]+$/g,
-                    SIM = v => v.indexOf(v.replace('~', '')) > - 1;
+    filter(args = { results: null }) {
+        console.log('IN FILTER', args);
+        return (
+            args.results ? Promise.resolve(args.results) : this.fetch(args)
+                .then(q => q.results)
+        ).then(results => {
 
+            console.log('KEYS', Object.keys(args));
+
+            if (results.length) {
                 for (let key in args) {
                     let value = args[ key ];
+
                     if (IGNORE_KEYS.indexOf(key) > -1) {
                         continue;
-                    } else if (v.indexOf('~') > -1) {
-                        const SIM = v => v.indexOf(value.replace('~', '')) > - 1;
-
-                        queryset.results = queryset.results.filter(SIM);
-                        queryset.rows = queryset.rows.filter(SIM);
+                    } else if (value && value.indexOf('~') > -1) {
+                        results = results.filter(v => v[ key ].indexOf(
+                            value.replace('~', '')
+                        ) > - 1);
                     } else if (OPERATOR_REGEXP.test(value)) {
 
                         // TODO check types
                         const PLAIN_VALUE = value.replace(OPERATOR_REGEXP, '');
-
                         switch (value.match(OPERATOR_REGEXP)[ 0 ]) {
                             case '>=':
-                                const GTE = v => v >= PLAIN_VALUE;
-
-                                queryset.results = queryset.results.filter(GTE);
-                                queryset.rows = queryset.rows.filter(GTE);
+                                results = results.filter(
+                                    v => v[ key ] >= PLAIN_VALUE
+                                );
                                 break;
                             case '<=':
-                                const LTE = v => v <= PLAIN_VALUE;
-
-                                queryset.results = queryset.results.filter(GTE);
-                                queryset.rows = queryset.rows.filter(GTE);
+                                results = results.filter(
+                                    v => v[ key ] <= PLAIN_VALUE
+                                );
                                 break;
                             case '>':
-                                const GT = v => v > PLAIN_VALUE;
-
-                                queryset.results = queryset.results.filter(GT);
-                                queryset.rows = queryset.rows.filter(GT);
-
+                                results = results.filter(
+                                    v => v[ key ] > PLAIN_VALUE
+                                );
                                 break;
                             case '<':
-                                const LT = v => v < PLAIN_VALUE;
-
-                                queryset.results = queryset.results.filter(LT);
-                                queryset.rows = queryset.rows.filter(LT);
+                                results = results.filter(
+                                    v => v[ key ] < PLAIN_VALUE
+                                );
                         }
                     } else {
-                        const EQUAL = v => v === value;
-
-                        queryset.results = queryset.results.filter(EQUAL);
-                        queryset.rows = queryset.rows.filter(EQUAL);
+                        results = results.filter(v => v[ key ] === value);
                     }
                 }
-            });
+            }
+
+            console.log(results);
+
+            return (this || args.model).$$queryset(
+                (args.model || this), args.query, results, []
+            );
+        });
     }
     create(args = {}) {
         const MODEL = args.model;
@@ -137,13 +142,9 @@ class BaseDBConnection {
             throw new $$InvalidModelReferenceError();
         }
 
-        console.log('ARGS 1', args);
-
         IGNORE_KEYS.forEach(function(k) {
             delete args[ k ];
         });
-
-        console.log('ARGS 2', args);
 
         protoObjectValue = new MODEL.$$Proto(args);
         protoSerializedObjectValue =
@@ -175,7 +176,6 @@ class BaseDBConnection {
         // Add update method to row set so that the whole queryset can be
         // updated
         // TODO use extend?
-        rows.filter = queryset.filter.bind(queryset, results);
         rows.update = queryset.update.bind(queryset, results);
         rows.delete = queryset.delete.bind(queryset, results);
 
@@ -189,9 +189,9 @@ class BaseDBConnection {
                 // Any errors
                 errors: errors,
                 first: AngieDBObject.first,
-                last: AngieDBObject.last
-            },
-            queryset
+                last: AngieDBObject.last,
+                filter: AngieDBObject.filter.bind(null, model, results)
+            }
         );
     }
 }
@@ -203,14 +203,9 @@ class AngieDBObject {
         this.model = model;
         this.query = query;
     }
-    filter(rows = [], args = {}) {
-        return this.database.filter(this, args);
-    }
     update(rows, args = {}) {
         rows = rows instanceof Array ? rows : [ rows ];
         args.database = this.database;
-
-        console.log('ARGS 0', rows, args);
 
         let me = this;
 
@@ -221,15 +216,13 @@ class AngieDBObject {
         return this.delete(rows).then(function() {
             let proms = [];
 
-            console.log('AFTER D');
-
-            return Promise.all(rows.map(v => { console.log(v, args, util._extend(v, args)); return me.model.create(util._extend(v, args)); }))
+            return Promise.all(rows.map(v => me.model.create(util._extend(v, args))))
                 .then(function(querysets) {
                     const ROWS = Array.prototype.concat
                         .apply([], querysets.map(v => v.results));
 
                     // TODO map all of the newly created rows
-                    return me.database.$$queryset(me.model, '', ROWS, []);
+                    return me.database.$$queryset(me.model, args.query, ROWS, []);
                 });
         });
     }
@@ -242,6 +235,10 @@ class AngieDBObject {
             } SET \`deleted\` = 1 WHERE \`id\` in (${IDS});`
 
         return this.database.run(this.model, QUERY);
+    }
+    static filter(model, results, args = {}) {
+        console.log('RESULTS', results, args);
+        return model.filter(util._extend({ model, results }, args));
     }
     static first() {
         return this[ 0 ];

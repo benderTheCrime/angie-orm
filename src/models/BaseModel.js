@@ -46,6 +46,12 @@ class BaseModel {
         args = util._extend({ model: this }, args);
         return this.$$prep.apply(this, args).fetch(args);
     }
+    find(count = 1) {
+        const ARGS = util._extend({
+            model: this
+        }, { count: parseInt(count) || 1 });
+        return this.$$prep.apply(this, ARGS).fetch(ARGS);
+    }
     filter(args = {}) {
         args = util._extend({ model: this }, args);
         return this.$$prep.apply(this, args).filter(args);

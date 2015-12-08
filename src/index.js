@@ -1,22 +1,28 @@
 // TODO a layer of abstraction must be built on top of this
     // TODO no such thing as update, only create (delete old)
         // TODO TEST delete one DONE
-        // TODO TEST delete many
+        // TODO TEST delete many DONE
         // TODO TEST update one DONE
         // TODO TEST update many
     // TODO filter querysets have to be performed after decodes
         // TODO fetch and filter, filter and fetch are called downstream of all
-            // TODO fetch
-            // TODO base filter
-            // TODO filter many
-// TODO script to run sql files - model sync for JS files
-// TODO refactor Exceptions, refactor Util, error in base-connection
+            // TODO fetch DONE
+            // TODO find DONE
+            // TODO base filter DONE
+            // TODO filter many DONE
+// TODO refactor Exceptions, refactor Util, move error in base-connection
 // TODO move fields and field errors to separate files
 // TODO move the db object, model separate
 // TODO add fields, type checking on fields
     // TODO add float
     // TODO check to see if values change?
 // TODO change all instances of run to $$run
+// TODO fix rest of filenames (dash)
+// TODO script to run sql files - model sync for JS files
+    // TODO make this a migration table!!
+        // TODO create before first migration and check
+        // TODO store by created and number of migration, name of migration
+            // TODO validate name
 // TODO add other keys - ability to set indices
 // TODO remove this.database references in basemodel, remove, "run" in connections
 
