@@ -1,6 +1,6 @@
 {
   "name": "angie-orm",
-  "version": "0.0.6",
+  "version": "1.0.0",
   "author": "Joe Groseclose <@benderTheCrime>",
   "description": "A Feature-Complete Database Relationship Manager Designed for NodeJS",
   "license": "MIT",

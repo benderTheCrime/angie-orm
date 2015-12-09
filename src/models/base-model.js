@@ -1,5 +1,5 @@
 /**
- * @module BaseModel.js
+ * @module base-model.js
  * @author Joe Groseclose <@benderTheCrime>
  * @date 8/23/2015
  */
@@ -13,7 +13,7 @@ import $LogProvider from                'angie-log';
 import router from                      '../databases/router';
 import {
     $$InvalidModelFieldReferenceError
-} from                                  '../util/$ExceptionsProvider';
+} from                                  '../services/exceptions';
 
 const IGNORE_KEYS = [
     'database',
@@ -81,8 +81,8 @@ class BaseModel {
             args.hasOwnProperty('database') ? args.database : null;
 
         // This forces the router to use a specific database, DB can also be
-        // forced at a model level by using this.database
-        return this.$$database = router(database || this.database || 'default');
+        // forced at a model level by using this.database in the model
+        return this.$$database = router(database || 'default');
     }
     $$serialize(obj) {
         return this.$$Proto.encode(obj);

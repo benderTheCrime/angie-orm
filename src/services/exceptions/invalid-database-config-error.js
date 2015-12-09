@@ -9,13 +9,13 @@ import $$InvalidConfigError from    './invalid-config-error';
 /**
  * @desc Thrown when there is an issue with the AngieFile.json configuration
  * specific to databases
- * @since 0.4.0
+ * @since 1.0.0
  * @access private
  */
 class $$InvalidDatabaseConfigError extends $$InvalidConfigError {
 
     /**
-     * @since 0.4.0
+     * @since 1.0.0
      * @access private
      */
     constructor() {

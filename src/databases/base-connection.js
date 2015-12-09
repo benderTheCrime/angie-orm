@@ -12,30 +12,12 @@ import $LogProvider from                'angie-log';
 // Angie ORM Modules
 import {
     $$InvalidModelReferenceError,
-    $$InvalidModelFieldReferenceError,
-    $$InvalidRelationCrossReferenceError
-} from                                  '../util/$ExceptionsProvider';
+    $$InvalidModelFieldReferenceError
+} from                                  '../services/exceptions';
+import DBObjectUtil from                '../util/util/db-object-util';
 
 // Keys we do not necessarily want to parse as query arguments
-const IGNORE_KEYS = [
-        'database',
-        '$$database',
-        'model',
-        'name',
-        'fields',
-        'tail',
-        'head',
-        'rows',
-        'update',
-        'first',
-        'last',
-        'values',
-        'id',
-        'created',
-        'query',
-        'results'
-    ],
-    OPERATOR_REGEXP = /^((<|>)=?)[^><]+$/g;
+const OPERATOR_REGEXP = /^((<|>)=?)[^><]+$/g;
 
 /**
  * @desc BaseDBConnection is a private class which is not exposed to the Angie
@@ -77,19 +59,15 @@ class BaseDBConnection {
         return this.all(args, fetchQuery);
     }
     filter(args = { results: null }) {
-        console.log('IN FILTER', args);
         return (
             args.results ? Promise.resolve(args.results) : this.fetch(args)
                 .then(q => q.results)
         ).then(results => {
-
-            console.log('KEYS', Object.keys(args));
-
             if (results.length) {
                 for (let key in args) {
                     let value = args[ key ];
 
-                    if (IGNORE_KEYS.indexOf(key) > -1) {
+                    if (DBObjectUtil.IGNORE_KEYS.indexOf(key) > -1) {
                         continue;
                     } else if (value && value.indexOf('~') > -1) {
                         results = results.filter(v => v[ key ].indexOf(
@@ -126,8 +104,6 @@ class BaseDBConnection {
                 }
             }
 
-            console.log(results);
-
             return (this || args.model).$$queryset(
                 (args.model || this), args.query, results, []
             );
@@ -142,9 +118,9 @@ class BaseDBConnection {
             throw new $$InvalidModelReferenceError();
         }
 
-        IGNORE_KEYS.forEach(function(k) {
-            delete args[ k ];
-        });
+        // Check that the key actually exists on the model and that it is of
+        // valid type
+        DBObjectUtil.validateInsertedDBObject(MODEL, args);
 
         protoObjectValue = new MODEL.$$Proto(args);
         protoSerializedObjectValue =
@@ -156,7 +132,7 @@ class BaseDBConnection {
     }
 
     $$queryset(model = {}, query, rows = [], errors) {
-        const queryset = new AngieDBObject(this, model, query);
+        const queryset = new DBObjectUtil(this, model, query);
         let results = [];
 
         if (rows instanceof Array) {
@@ -188,84 +164,12 @@ class BaseDBConnection {
 
                 // Any errors
                 errors: errors,
-                first: AngieDBObject.first,
-                last: AngieDBObject.last,
-                filter: AngieDBObject.filter.bind(null, model, results)
+                first: DBObjectUtil.first,
+                last: DBObjectUtil.last,
+                filter: DBObjectUtil.filter.bind(null, model, results)
             }
         );
     }
 }
 
-// TODO move this to another class
-class AngieDBObject {
-    constructor(database, model, query = '') {
-        this.database = database;
-        this.model = model;
-        this.query = query;
-    }
-    update(rows, args = {}) {
-        rows = rows instanceof Array ? rows : [ rows ];
-        args.database = this.database;
-
-        let me = this;
-
-        IGNORE_KEYS.forEach(function(k) {
-            delete args[ k ];
-        });
-
-        return this.delete(rows).then(function() {
-            let proms = [];
-
-            return Promise.all(rows.map(v => me.model.create(util._extend(v, args))))
-                .then(function(querysets) {
-                    const ROWS = Array.prototype.concat
-                        .apply([], querysets.map(v => v.results));
-
-                    // TODO map all of the newly created rows
-                    return me.database.$$queryset(me.model, args.query, ROWS, []);
-                });
-        });
-    }
-    delete(rows = []) {
-        rows = rows instanceof Array ? rows : [ rows ];
-
-        const IDS = rows.map(v => v.id).join(','),
-            QUERY = `UPDATE ${
-                this.model.name
-            } SET \`deleted\` = 1 WHERE \`id\` in (${IDS});`
-
-        return this.database.run(this.model, QUERY);
-    }
-    static filter(model, results, args = {}) {
-        console.log('RESULTS', results, args);
-        return model.filter(util._extend({ model, results }, args));
-    }
-    static first() {
-        return this[ 0 ];
-    }
-    static last() {
-        return this.pop();
-    }
-}
-
-// TODO move this to exceptions
-class $$DatabaseConnectivityError extends Error {
-    constructor(database) {
-        let message;
-        switch (database.type) {
-            case 'mysql':
-                message = 'Could not find MySql database ' +
-                    `${cyan(database.name || database.alias)}@` +
-                    `${database.host || '127.0.0.1'}:${database.port || 3306}`;
-                break;
-            default:
-                message = `Could not find ${cyan(database.name)} in filesystem.`;
-        }
-        $LogProvider.error(message);
-        super();
-        process.exit(1);
-    }
-}
-
 export default BaseDBConnection;
-export { $$DatabaseConnectivityError };

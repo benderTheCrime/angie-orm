@@ -16,7 +16,7 @@ import $LogProvider from                        'angie-log';
 
 // Angie ORM Modules
 import BaseDBConnection from                    './base-connection';
-import { $$InvalidDatabaseConfigError } from    '../util/$ExceptionsProvider';
+import { $$InvalidDatabaseConfigError } from    '../services/exceptions';
 
 const MYSQL_INFO = $LogProvider.info.bind(null, 'MySQL'),
     DEFAULT_HOST = '127.0.0.1',
@@ -73,7 +73,7 @@ class MySqlConnection extends BaseDBConnection {
         this.connection.end();
         this.connected = false;
     }
-    run(model, query) {
+    $$run(model, query) {
         let me = this,
             name = this.name;
         return this.connect().then(function() {
@@ -101,17 +101,17 @@ class MySqlConnection extends BaseDBConnection {
     all() {
         const MODEL = arguments[ 0 ].model,
             QUERY = super.all.apply(this, arguments);
-        return this.run(MODEL, QUERY);
+        return this.$$run(MODEL, QUERY);
     }
     create() {
         const MODEL = arguments[ 0 ].model,
             QUERY = super.create.apply(this, arguments);
-        return this.run(MODEL, QUERY);
+        return this.$$run(MODEL, QUERY);
     }
     delete() {
         const MODEL = arguments[ 0 ].model,
             QUERY = super.delete.apply(this, arguments);
-        return this.run(MODEL, QUERY);
+        return this.$$run(MODEL, QUERY);
     }
 }
 

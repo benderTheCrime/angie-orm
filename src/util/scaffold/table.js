@@ -1,7 +1,7 @@
 /**
  * @module table.js
  * @author Joe Groseclose <@benderTheCrime>
- * @date 8/23/2015
+ * @date 12/06/2015
  */
 
 // System Modules
@@ -12,10 +12,12 @@ import { cyan } from                    'chalk';
 import $Injector from                   'angie-injector';
 import $LogProvider from                'angie-log';
 
-// Project Modules
+// Angie ORM Modules
 import { default as router } from       '../../databases/router';
-import { $$ModelCreationError } from    '../$ExceptionsProvider';
-import { $$InvalidConfigError } from    '../../services/exceptions';
+import {
+    $$InvalidConfigError,
+    $$InvalidModelConfigError
+} from                                  '../../services/exceptions';
 import { $DateUtil } from               '../util';
 
 const $StringUtil = $Injector.get('$StringUtil'),
@@ -35,7 +37,7 @@ export default function() {
             argv._[ 2 ] : argv.d || argv.database || 'default';
 
     if (!NAME) {
-        throw new $$ModelCreationError();
+        throw new $$InvalidModelConfigError();
     }
 
     if (!PROJECT_NAME) {
@@ -62,7 +64,7 @@ export default function() {
             CLASS_CAMEL_NAME,
             UNDERSCORE_NAME
         ),
-        TABLE_FILE = util.format(TABLE_TEMPLATE, DASH_NAME),
+        TABLE_FILE = util.format(TABLE_TEMPLATE, UNDERSCORE_NAME),
         PROTO_DIR = `${process.cwd()}/proto`,
         MODEL_DIR = `${process.cwd()}/src/models`,
         PROTO_NAME = `${DASH_NAME}.proto`,
@@ -122,8 +124,8 @@ export default function() {
         `Attempting to create table in database ${cyan(DATABASE.database.name)}`
     );
 
-    DATABASE.run(`CREATE SCHEMA ${DATABASE.database.name}`).then(function() {
-        return DATABASE.run(TABLE_FILE);
+    DATABASE.$$run(`CREATE SCHEMA ${DATABASE.database.name}`).then(function() {
+        return DATABASE.$$run(TABLE_FILE);
     }).then(function() {
         $LogProvider.info('Angie Model created and ready to use!');
         process.exit(0);

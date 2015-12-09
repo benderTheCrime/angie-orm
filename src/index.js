@@ -1,30 +1,11 @@
-// TODO a layer of abstraction must be built on top of this
-    // TODO no such thing as update, only create (delete old)
-        // TODO TEST delete one DONE
-        // TODO TEST delete many DONE
-        // TODO TEST update one DONE
-        // TODO TEST update many
-    // TODO filter querysets have to be performed after decodes
-        // TODO fetch and filter, filter and fetch are called downstream of all
-            // TODO fetch DONE
-            // TODO find DONE
-            // TODO base filter DONE
-            // TODO filter many DONE
-// TODO refactor Exceptions, refactor Util, move error in base-connection
-// TODO move fields and field errors to separate files
-// TODO move the db object, model separate
-// TODO add fields, type checking on fields
-    // TODO add float
-    // TODO check to see if values change?
-// TODO change all instances of run to $$run
-// TODO fix rest of filenames (dash)
 // TODO script to run sql files - model sync for JS files
     // TODO make this a migration table!!
         // TODO create before first migration and check
         // TODO store by created and number of migration, name of migration
             // TODO validate name
+        // TODO run
+            // TODO attempt to create the table in the migration run as well
 // TODO add other keys - ability to set indices
-// TODO remove this.database references in basemodel, remove, "run" in connections
 
 /**
  * @module index.js
@@ -41,6 +22,7 @@ import $LogProvider from                        'angie-log';
 
 // Angie ORM Modules
 import { default as $$createModel } from        './util/scaffold/table';
+import { default as $$createMigration } from    './util/scaffold/migration';
 
 let args = [];
 
@@ -51,10 +33,18 @@ process.argv.forEach(function(v) {
     }
 });
 
+console.log('ARGV', argv._);
+
 // Route the CLI request to a specific command if running from CLI
 switch ((args[ 0 ] || argv._ || '').toLowerCase()) {
     case 'create' || 'c':
-        $$createModel();
+        switch ((args[ 1 ] || argv._ || '').toLowerCase()) {
+            case 'model':
+                $$createModel();
+                break;
+            case 'migration':
+                $$createMigration();
+        }
         break;
     case 'test':
 

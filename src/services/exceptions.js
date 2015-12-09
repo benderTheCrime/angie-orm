@@ -5,13 +5,20 @@
  */
 
 // Angie Modules
-import $$InvalidConfigError from            './exceptions/invalid-config-error';
-import $$InvalidDatabaseConfigError from    './exceptions/invalid-database-config-error';
-import $$MissingProtoError from             './exceptions/missing-proto-error';
-import $$ModelCreationError from            './exceptions/model-creation-error';
+import $$InvalidConfigError from                    './exceptions/invalid-config-error';
+import $$InvalidDatabaseConfigError from            './exceptions/invalid-database-config-error';
+import $$InvalidModelConfigError from               './exceptions/invalid-model-config-error';
+import $$InvalidModelReferenceError from            './exceptions/invalid-model-reference-error';
+import $$InvalidModelFieldReferenceError from       './exceptions/invalid-model-field-reference-error';
+import $$MissingProtoError from                     './exceptions/missing-proto-error';
+import $$ModelCreationError from                    './exceptions/model-creation-error';
 
 export {
     $$InvalidConfigError,
     $$InvalidDatabaseConfigError,
+    $$InvalidModelConfigError,
+    $$InvalidModelReferenceError,
+    $$InvalidModelFieldReferenceError,
+    $$MissingProtoError,
     $$ModelCreationError
 };

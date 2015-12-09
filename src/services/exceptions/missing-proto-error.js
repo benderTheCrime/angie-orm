@@ -11,13 +11,13 @@
 /**
  * @desc Thrown when the ORM fails to find the proto file associated with a
  * model
- * @since 0.4.0
+ * @since 1.0.0
  * @access private
  */
 class $$MissingProtoError {
 
     /**
-     * @since 0.4.0
+     * @since 1.0.0
      * @access private
      */
     constructor(name) {

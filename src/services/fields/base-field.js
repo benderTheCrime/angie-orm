@@ -1,18 +1,11 @@
 /**
- * @module $Fields.js
+ * @module base-field.js
  * @author Joe Groseclose <@benderTheCrime>
- * @date 8/23/2015
+ * @date 12/08/2015
  */
 
 // System Modules
 import util from                'util';
-import {
-    magenta,
-    cyan
-} from                          'chalk';
-import $LogProvider from        'angie-log';
-
-const p = process;
 
 class BaseField {
     constructor(
@@ -87,57 +80,4 @@ class BaseField {
     }
 }
 
-class CharField extends BaseField {
-    constructor() {
-        super(...arguments);
-        this.type = 'CharField';
-    }
-    create() {
-        super.create();
-        if (!this.value) {
-            this.value = '';
-        }
-    }
-    validate(value) {
-        value = this.value || value;
-        if (typeof value !== 'string') {
-            return false;
-        }
-        return super.validate(value);
-    }
-}
-
-class IntegerField extends BaseField {
-    constructor() {
-        super(...arguments);
-        this.type = 'IntegerField';
-    }
-}
-
-class KeyField extends IntegerField {
-    constructor() {
-        super(1);
-        this.type = 'KeyField';
-        this.unique = false;
-        this.minValue = 1;
-        this.maxLength = 11;
-        this.nullable = false;
-    }
-}
-
-class $$InvalidFieldConfigError extends TypeError {
-    constructor(type, error = '') {
-        $LogProvider.error(
-            `Invalid Field configuration for ${magenta(type)}` +
-            `${error ? `: ${error}` : ''}`
-        );
-        super();
-        p.exit(1);
-    }
-}
-
-export {
-    CharField,
-    IntegerField,
-    KeyField
-};
+export default BaseField;

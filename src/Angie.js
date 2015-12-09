@@ -12,11 +12,11 @@ import $Injector from                           'angie-injector';
 import $LogProvider from                        'angie-log';
 
 // Angie ORM Modules
-import BaseModel from                           './models/BaseModel';
-import * as $$FieldProvider from                './models/$Fields';
-import { $$InvalidModelConfigError } from       './util/$ExceptionsProvider';
+import BaseModel from                           './models/base-model';
+import * as $$FieldProvider from                './services/fields';
 import {
     $$InvalidConfigError,
+    $$InvalidModelConfigError,
     $$MissingProtoError
 } from                                          './services/exceptions';
 

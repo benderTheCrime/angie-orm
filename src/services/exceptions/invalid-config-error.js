@@ -10,13 +10,13 @@ import $LogProvider from            'angie-log';
 
 /**
  * @desc Thrown when there is an issue with the AngieFile.json configuration
- * @since 0.4.0
+ * @since 1.0.0
  * @access private
  */
 class $$InvalidConfigError {
 
     /**
-     * @since 0.4.0
+     * @since 1.0.0
      * @access private
      */
     constructor(name = '') {
