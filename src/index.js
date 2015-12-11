@@ -1,10 +1,15 @@
 // TODO script to run sql files - model sync for JS files
-    // TODO make this a migration table!!
-        // TODO create before first migration and check
-        // TODO store by created and number of migration, name of migration
-            // TODO validate name
+    // TODO make this a migration table!! DONE
+        // TODO create before first migration and check DONE
+        // TODO store by created and number of migration, name of migration DONE
+            // TODO validate name DONE
+        // TODO create migrations folder DONE
         // TODO run
             // TODO attempt to create the table in the migration run as well
+            // TODO check to see if the migration has been fun by filename after
+            // reading the dir
+            // TODO injection bind migration files
+    // TODO help items for the model/migration run/create tasks
 // TODO add other keys - ability to set indices
 
 /**
@@ -32,8 +37,6 @@ process.argv.forEach(function(v) {
         args.push(v);
     }
 });
-
-console.log('ARGV', argv._);
 
 // Route the CLI request to a specific command if running from CLI
 switch ((args[ 0 ] || argv._ || '').toLowerCase()) {

@@ -44,10 +44,7 @@ class BaseField {
         }
     }
     validate(value) {
-
-        // TODO is this necessary?
-        // value = value || this.value;
-        if (!value && !this.nullable) {
+        if (value === null && !this.nullable) {
             return false;
         }
         if (

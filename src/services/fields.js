@@ -5,13 +5,15 @@
  */
 
 import CharField from           './fields/char-field';
-import IntegerField from       './fields/integer-field';
+import IntegerField from        './fields/integer-field';
 import KeyField from            './fields/key-field';
-import FloatField from            './fields/float-field';
+import FloatField from          './fields/float-field';
+import BooleanField from        './fields/boolean-field';
 
 export {
     CharField,
     IntegerField,
     KeyField,
-    FloatField
+    FloatField,
+    BooleanField
 };

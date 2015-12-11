@@ -52,15 +52,15 @@ class DBObjectUtil {
         Object.keys(args).forEach(k => {
             const VALUE = args[ k ];
 
+            console.log(k , model[ k ]);
+            console.log(VALUE);
+
             if (this.IGNORE_KEYS.includes(k)) {
                 delete args[ k ];
             } else if (
-                !(
-                    model[ k ] &&
-                    model[ k ].type &&
-                    model[ k ].validate(VALUE)
-                )
+                !(model[ k ] && model[ k ].type && model[ k ].validate(VALUE))
             ) {
+                console.log('k', k, model[ k ], model[ k ].type, model[ k ].validate(VALUE));
                 throw new $$InvalidModelFieldReferenceError(model.name, k);
             }
         });
@@ -69,10 +69,10 @@ class DBObjectUtil {
         return model.filter(util._extend({ model, results }, args));
     }
     static first() {
-        return this[ 0 ];
+        return this.length ? this[ 0 ] : null;
     }
     static last() {
-        return this.pop();
+        return this.length ? this.slice(-1)[ 0 ] : null;
     }
 }
 

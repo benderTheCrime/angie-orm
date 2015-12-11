@@ -40,10 +40,6 @@ function Model(name, Obj = {}) {
             new Obj($$FieldProvider) :
                 typeof Obj === 'object' ? Obj : undefined;
 
-    if (!PROJECT_NAME) {
-        throw new $$InvalidConfigError('projectName');
-    }
-
     if (!MODEL.name) {
         if (name) {
             MODEL.name = name;
@@ -52,13 +48,20 @@ function Model(name, Obj = {}) {
         }
     }
 
+    let projectName = MODEL.name === 'angie_migrations' ?
+        'AngieORM' : app.$$config.projectName;
+
+    if (!projectName) {
+        throw new $$InvalidConfigError('projectName');
+    }
+
     // We need to try and load the associated proto!
     const $StringUtil = $Injector.get('$StringUtil'),
         CLASS_CAMEL_NAME = $StringUtil.toClassCase(MODEL.name),
         BUILDER = Protobuf.loadProtoFile(
             MODEL.protoFilename || `${process.cwd()}/proto/${MODEL.name}.proto`
         ),
-        SCHEMA = BUILDER.build(app.$$config.projectName),
+        SCHEMA = BUILDER.build(projectName),
         PROTO = SCHEMA[ CLASS_CAMEL_NAME ][ CLASS_CAMEL_NAME ];
     let instance;
 
@@ -75,5 +78,5 @@ function Model(name, Obj = {}) {
         throw new $$InvalidModelConfigError(MODEL.name);
     }
 
-    return this.$$register('Models', MODEL.name, instance);
+    return this.$$register('Models', CLASS_CAMEL_NAME, instance);
 };

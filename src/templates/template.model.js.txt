@@ -10,6 +10,8 @@ import { Model } from     'angie-orm/src/util/decorators';
 class %s {
     constructor($Fields) {
         this.name = '%s';
-        // TODO create fields here
+
+        // Create fields here
+        this.uuid = new $Fields.CharField();
     }
 }
