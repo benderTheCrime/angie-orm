@@ -13,6 +13,7 @@ import $$InvalidModelFieldReferenceError from       './exceptions/invalid-model-
 import $$MissingProtoError from                     './exceptions/missing-proto-error';
 import $$ModelCreationError from                    './exceptions/model-creation-error';
 import $$MigrationCreationError from                './exceptions/migration-creation-error';
+import $$MigrationInvocationError from              './exceptions/migration-invocation-error';
 
 export {
     $$InvalidConfigError,
@@ -22,5 +23,6 @@ export {
     $$InvalidModelFieldReferenceError,
     $$MissingProtoError,
     $$ModelCreationError,
-    $$MigrationCreationError
+    $$MigrationCreationError,
+    $$MigrationInvocationError
 };

@@ -1,6 +1,4 @@
 {
     "projectName": "angie-orm",
-    "dependencies": [
-        "angie-log"
-    ]
+    "dependencies": [ "angie-log" ]
 }

@@ -66,38 +66,48 @@ class BaseDBConnection {
             if (results.length) {
                 for (let key in args) {
                     let value = args[ key ];
+                    const VALUE_IS_STRING = typeof value === 'string';
+
+                    console.log('VALUE', value);
 
                     if (DBObjectUtil.IGNORE_KEYS.indexOf(key) > -1) {
                         continue;
-                    } else if (value && value.indexOf('~') > -1) {
+                    } else if (
+                        VALUE_IS_STRING &&
+                        value.indexOf('~') > -1
+                    ) {
                         results = results.filter(v => v[ key ].indexOf(
                             value.replace('~', '')
                         ) > - 1);
-                    } else if (OPERATOR_REGEXP.test(value)) {
+                    } else if (
+                        VALUE_IS_STRING &&
+                        OPERATOR_REGEXP.test(value)
+                    ) {
+                        let plainValue = value.replace(OPERATOR_REGEXP, ''),
+                            fn = v => true;
 
-                        // TODO check types
-                        const PLAIN_VALUE = value.replace(OPERATOR_REGEXP, '');
+                        // Considerations for numeric values
+                        if (args.model.type.includes('Integer')) {
+                            plainValue = parseInt(plainValue);
+                        } else if (args.model.type.includes('Float')) {
+                            plainValue = parseFloat(plainValue);
+                        }
+
                         switch (value.match(OPERATOR_REGEXP)[ 0 ]) {
                             case '>=':
-                                results = results.filter(
-                                    v => v[ key ] >= PLAIN_VALUE
-                                );
+                                fn = v => v[ key ] >= plainValue;
                                 break;
                             case '<=':
-                                results = results.filter(
-                                    v => v[ key ] <= PLAIN_VALUE
-                                );
+                                fn = v => v[ key ] <= plainValue;
                                 break;
                             case '>':
-                                results = results.filter(
-                                    v => v[ key ] > PLAIN_VALUE
-                                );
+                                fn = v => v[ key ] > plainValue;
                                 break;
                             case '<':
-                                results = results.filter(
-                                    v => v[ key ] < PLAIN_VALUE
-                                );
+                                fn = v => v[ key ] < plainValue
                         }
+
+                        results = results.filter(fn);
                     } else {
                         results = results.filter(v => v[ key ] === value);
                     }
@@ -158,15 +168,13 @@ class BaseDBConnection {
         return util._extend(
             rows,
             {
-
-                // The raw query results
                 results: results,
-
-                // Any errors
                 errors: errors,
                 first: DBObjectUtil.first,
                 last: DBObjectUtil.last,
-                filter: DBObjectUtil.filter.bind(null, model, results)
+                filter: DBObjectUtil.filter.bind(null, model, results),
+                generator: DBObjectUtil.yield.bind(null, results),
+                yield: DBObjectUtil.yield.bind(null, results)
             }
         );
     }

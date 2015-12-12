@@ -74,6 +74,10 @@ export default function() {
     let statProto = false,
         statModel = false;
 
+    try {
+        fs.mkDirSync(PROTO_DIR);
+    } catch(e) {}
+
     // See if the proto or model files already exist
     try {
         fs.statSync(PROTO_FILENAME);
@@ -92,15 +96,7 @@ export default function() {
             fs.writeFileSync(PROTO_FILENAME, PROTO_FILE);
         }
     } catch(e) {
-        if (e.code === 'ENOENT') {
-            $LogProvider.warn(`Could not find directory ${cyan(PROTO_DIR)}`);
-            $LogProvider.warn(
-                `Writing ${cyan(PROTO_NAME)} to current directory`
-            );
-            fs.writeFileSync(PROTO_NAME, PROTO_FILE);
-        } else {
-            $LogProvider.error(e);
-        }
+        $LogProvider.error(e);
     }
 
     try {
@@ -108,15 +104,7 @@ export default function() {
             fs.writeFileSync(MODEL_FILENAME, MODEL_FILE);
         }
     } catch(e) {
-        if (e.code === 'ENOENT') {
-            $LogProvider.warn(`Could not find directory ${cyan(MODEL_DIR)}`);
-            $LogProvider.warn(
-                `Writing ${cyan(MODEL_NAME)} to current directory`
-            );
-            fs.writeFileSync(MODEL_NAME, MODEL_FILE);
-        } else {
-            $LogProvider.error(e);
-        }
+        $LogProvider.error(e);
     }
 
     $LogProvider.info(`Successfully created ${NAME} model files`);

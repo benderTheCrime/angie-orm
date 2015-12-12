@@ -25,7 +25,6 @@ import $LogProvider from                    'angie-log';
 
 // Angie ORM Modules
 import { default as router } from           '../../databases/router';
-import { Model } from                       '../decorators';
 import { $$MigrationCreationError } from    '../../services/exceptions/migration-creation-error';
 import { $DateUtil } from                   '../util';
 

@@ -4,6 +4,9 @@
  * @date 12/08/2015
  */
 
+// System Modules
+import util from                        'util';
+
  // Angie ORM Modules
  import {
      $$InvalidModelFieldReferenceError
@@ -23,7 +26,7 @@ class DBObjectUtil {
 
         // Check that the key actually exists on the model and that it is of
         // valid type
-        validateInsertedDBObject(this.model, args);
+        DBObjectUtil.validateInsertedDBObject(this.model, args);
 
         return this.delete(rows).then(function() {
             let proms = [];
@@ -73,6 +76,11 @@ class DBObjectUtil {
     }
     static last() {
         return this.length ? this.slice(-1)[ 0 ] : null;
+    }
+    static* yield(results) {
+        for (let result of results) {
+            yield result;
+        }
     }
 }
 

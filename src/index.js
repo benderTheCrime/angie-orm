@@ -1,16 +1,18 @@
-// TODO script to run sql files - model sync for JS files
-    // TODO make this a migration table!! DONE
-        // TODO create before first migration and check DONE
-        // TODO store by created and number of migration, name of migration DONE
-            // TODO validate name DONE
-        // TODO create migrations folder DONE
         // TODO run
             // TODO attempt to create the table in the migration run as well
             // TODO check to see if the migration has been fun by filename after
             // reading the dir
             // TODO injection bind migration files
-    // TODO help items for the model/migration run/create tasks
+// TODO refactor angie-injector exceptions
 // TODO add other keys - ability to set indices
+// TODO shrinkwrap
+// TODO test/doc
+// TODO hook up to coveralls
+
+// TODO release log, injector
+// TODO release angie
+// TODO release this
+// TODO bindings
 
 /**
  * @module index.js
@@ -20,6 +22,7 @@
 
 // Global modules
 import                                          './angie';
+import                                          './models/angie-migrations.model';
 
 // System Modules
 import { argv } from                            'yargs';
@@ -28,26 +31,25 @@ import $LogProvider from                        'angie-log';
 // Angie ORM Modules
 import { default as $$createModel } from        './util/scaffold/table';
 import { default as $$createMigration } from    './util/scaffold/migration';
+import { $$migrateAll, $$migrate } from         './util/invoke/migrations';
 
-let args = [];
-
-// Remove trivial arguments
-process.argv.forEach(function(v) {
-    if (!v.match(/(node|iojs|index|angie(\-orm)?)/)) {
-        args.push(v);
-    }
-});
+const ERR = c => `No valid ${c} command component specified, please see the ` +
+        "help commands for more options",
+    TYPE = argv._[ 1 ] || '';
 
 // Route the CLI request to a specific command if running from CLI
-switch ((args[ 0 ] || argv._ || '').toLowerCase()) {
-    case 'create' || 'c':
-        switch ((args[ 1 ] || argv._ || '').toLowerCase()) {
-            case 'model':
-                $$createModel();
-                break;
-            case 'migration':
-                $$createMigration();
-        }
+switch ((argv._[ 0 ] || '').toLowerCase()) {
+    case 'create':
+        handleCreationTask();
+        break;
+    case 'c':
+        handleCreationTask();
+        break;
+    case 'run':
+        handleRunTask();
+        break;
+    case 'r':
+        handleRunTask();
         break;
     case 'test':
 
@@ -61,4 +63,30 @@ switch ((args[ 0 ] || argv._ || '').toLowerCase()) {
                 $LogProvider.info(std);
             }
         });
+}
+
+function handleCreationTask() {
+    switch (TYPE.toLowerCase()) {
+        case 'model':
+            $$createModel();
+            break;
+        case 'migration':
+            $$createMigration();
+            break;
+        default:
+            $LogProvider.error(ERR('create'));
+    }
+}
+
+function handleRunTask() {
+    switch (TYPE.toLowerCase()) {
+        case 'migrations':
+            $$migrateAll();
+            break;
+        case 'migration':
+            $$migrate();
+            break;
+        default:
+            $LogProvider.error(ERR('run'));
+    }
 }

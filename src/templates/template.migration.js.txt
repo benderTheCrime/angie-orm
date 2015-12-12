@@ -1,10 +1,10 @@
 /**
- * @module %s-%s.js // number and dash name
+ * @module %s-%s.js
  * @author <Your Name>
- * @date %s // Formatted date
+ * @date %s
  */
 
-@Migration
-function() {
+export default function() {
+
     // TODO add migration code here
-}
+};
