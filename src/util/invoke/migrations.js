@@ -12,18 +12,34 @@
 import                                          'babel-core';
 
 // System Modules
+import fs from                                  'fs';
+import util from                                'util';
 import { argv } from                            'yargs';
 import { $injectionBinder } from                'angie-injector';
 import $LogProvider from                        'angie-log';
 
 // Angie ORM Modules
+import { default as router } from               '../../databases/router';
 import { $$MigrationInvocationError } from      '../../services/exceptions';
+
+const TABLE_TEMPLATE = fs.readFileSync(
+        `${__dirname}/../../templates/template.table.sql.txt`, 'utf8'
+    ),
+    TABLE_FILE = util.format(TABLE_TEMPLATE, 'angie_migrations');
 
 function migrateAll() {
     return getInactiveMigrations().then(function(queryset) {
-        return Promise.all(queryset.map(v => migrate(null, v)));
-    }).then(function() {
-        $LogProvider.info(`Successfully ran all inactive migrations`);
+        return Promise.all(
+            queryset && queryset.length ?
+                queryset.map(v => migrate(null, v)) : []
+        );
+    }).then(function(proms) {
+        if (!proms.length) {
+            $LogProvider.info('No inactive migrations to run!');
+        } else {
+            $LogProvider.info('Successfully ran all inactive migrations');
+        }
+
         process.exit(0);
     }).catch(function(e) {
         $LogProvider.error(e);
@@ -96,7 +112,12 @@ function migrate(number, migration) {
 }
 
 function getInactiveMigrations() {
-    return app.Models.AngieMigrations.filter({ active: false });
+    const DATABASE = router(argv.database || argv.d || 'default'),
+        MODEL = app.Models.AngieMigrations;
+
+    return DATABASE.$$run(null, TABLE_FILE).then(function() {
+        MODEL.filter({ active: false });
+    });
 }
 
 export {

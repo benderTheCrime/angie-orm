@@ -33,30 +33,17 @@ const $StringUtil = $Injector.get('$StringUtil'),
     ENCODING = 'utf8',
     TABLE_TEMPLATE = fs.readFileSync(`${TEMPLATE_PREFIX}table.sql.txt`, ENCODING),
     MIGRATION_TEMPLATE =
-        fs.readFileSync(`${TEMPLATE_PREFIX}migration.js.txt`, ENCODING);
+        fs.readFileSync(`${TEMPLATE_PREFIX}migration.js.txt`, ENCODING),
+    TABLE_FILE = util.format(TABLE_TEMPLATE, 'angie_migrations');
 
 export default function() {
-    @Model
-    class AngieMigrations {
-        constructor($Fields) {
-            this.name = 'angie_migrations';
-            this.protoFilename =
-                `${__dirname}/../../../proto/angie-migrations.proto`;
-
-            this.uuid = new $Fields.CharField();
-            this.filename = new $Fields.CharField();
-            this.active = new $Fields.BooleanField();
-        }
-    }
-
     const DATABASE = router(argv.database || argv.d || 'default'),
         MODEL = app.Models.AngieMigrations,
         MIGRATION_NAME = argv._.length > 2 ?
             argv._[ 2 ] : argv.n || argv.name || 'angie-orm-migration',
         CAMEL_NAME = $StringUtil.toCamel(MIGRATION_NAME),
         DASH_NAME = $StringUtil.toDash(MIGRATION_NAME),
-        UNDERSCORE_NAME = $StringUtil.toDash(MIGRATION_NAME),
-        TABLE_FILE = util.format(TABLE_TEMPLATE, 'angie_migrations');
+        UNDERSCORE_NAME = $StringUtil.toDash(MIGRATION_NAME);
 
     if (!MIGRATION_NAME) {
         throw new $$MigrationCreationError(1);

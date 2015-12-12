@@ -1,8 +1,3 @@
-        // TODO run
-            // TODO attempt to create the table in the migration run as well
-            // TODO check to see if the migration has been fun by filename after
-            // reading the dir
-            // TODO injection bind migration files
 // TODO refactor angie-injector exceptions
 // TODO add other keys - ability to set indices
 // TODO shrinkwrap
