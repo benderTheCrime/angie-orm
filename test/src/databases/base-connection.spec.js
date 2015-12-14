@@ -2,7 +2,7 @@
 import { expect } from      'chai';
 
 // Angie Modules
-const BaseDBConnection =    require(`../../../${global.TEST_ENV}/databases/BaseDBConnection`).default;
+const BaseDBConnection =    require(`../../../${global.TEST_ENV}/databases/base-connection`).default;
 
 describe('BaseDBConnection', function() {
     let base;

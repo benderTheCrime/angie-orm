@@ -1,10 +1,11 @@
-// TODO refactor angie-injector exceptions
+// TODO refactor angie-injector exceptions DONE
 // TODO add other keys - ability to set indices
-// TODO shrinkwrap
-// TODO test/doc
+
+// TODO test/doc & wallaby
 // TODO hook up to coveralls
 
 // TODO release log, injector
+// TODO shrinkwrap
 // TODO release angie
 // TODO release this
 // TODO bindings
