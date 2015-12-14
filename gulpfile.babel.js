@@ -131,10 +131,10 @@ function mochaHandler(src, coverage = '/tmp') {
     return gulp.src(TEST_SRC).pipe(mocha({
         reporter: 'spec'
     })).pipe(istanbul.writeReports({
-        dir: coverage,
+        dir: COVERAGE_SRC,
         reportOpts: {
-            dir: coverage
+            dir: COVERAGE_SRC
         },
-        reporters: [ 'text', 'text-summary', 'html', 'cobertura' ]
+        reporters: [ 'text', 'text-summary', 'lcov' ]
     }));
 }
