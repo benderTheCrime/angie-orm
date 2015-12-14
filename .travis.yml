@@ -4,6 +4,7 @@ node_js:
   - iojs-v2.5.0
   - 4.0.0
   - 4.2.1
+  - 5.2.0
 deploy:
   provider: npm
   email: joe.groseclose@gmail.com
@@ -11,5 +12,5 @@ deploy:
     secure: Fq+a7XdsveC26spnDnNppba9Aa0sjAMdfR3YZLeruLiGVKrTZjTgEOOFvh8mOlWkP1A2h5yYcCubTLXKQYBvnOTDxpsdIjkMPZ/OiGJpd2AvEs9Kl+SQP4XEQGNDDBwhkDE6sZTmWtb6AyGMRkQNXzS48udLRnFGtp1x2Uoku/exf/AY/cVKnkPTZJq0QP91F9CAeYx1X4TDWctfPdSi41+SWP0mnybkZROHxPqeNttNDPrVO2GBPy3wW7Dc64Kbe+tyUSOVMfPtKU2feBBQz+XmJyJxLaDsSaPLYERwQenV1K0q8bws7pKwhJtYCgKBHLGbMIntpkQ/kZOTawyxfva4qRGJbd8SvabaUoUSyeIlq+sAOhslmihrvKV84zwVwgoKJB5g4kltU9rbQEF9wNa96WhU3XJQecFkvhGwrqEAc/xmdilMhdTwXs5eq+kvCc5Rbvbu7yXzcfG6ZS2oZ16zj1+kBSnb12n70NZNWS5xxliBKMarnsyCb1ayq2ywPs+YDH3i5LdMdy1+fzAi9HpKf7tMZ6jkEiOMtcs729RR/uqs6up/cgUZ74hCLt8LRa9kRPuawcp2XNLfNZwXPC7esi2a+zH/eyAW0zAstT+VWszFxRvOqZLKZ29HZeQBqTirKcaCaW/3Ra9upEOnl6ANm/O8queVWdeMDH7F1qI=
   on:
     tags: true
-    node: 4.0.0
+    node: 5.2.0
     repo: benderTheCrime/angie-orm
