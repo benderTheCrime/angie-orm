@@ -4,22 +4,11 @@
  * @date 12/08/2015
  */
 
-//TODO create migration Proto
-    // TODO fields for uuid, filename, run or not run DONE
-// TODO register model DONE
-// TODO create migration file from template DONE
-    // TODO date util DONE
-    // TODO migration naming from string util DONE
-// TODO store migration in project migration folder at root DONE
-// TODO store as not run in DB DONE
-// TODO select migrations properly from DB DONE
-
-
 // System Modules
 import fs from                              'fs';
 import util from                            'util';
-import { cyan } from                        'chalk';
 import { argv } from                        'yargs';
+import { cyan } from                        'chalk';
 import $Injector from                       'angie-injector';
 import $LogProvider from                    'angie-log';
 
@@ -81,7 +70,9 @@ export default function() {
                 active: false
             });
         }).then(function() {
-            $LogProvider.info(`Successfully created migration ${MIGRATION_NAME}`);
+            $LogProvider.info(`Successfully created migration ${
+                cyan(MIGRATION_NAME)
+            }`);
             process.exit(0);
         }).catch(function(e) {
             $LogProvider.error(e);

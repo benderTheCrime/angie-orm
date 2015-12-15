@@ -50,13 +50,12 @@ class BaseDBConnection {
     }
     fetch(args = {}, filterQuery = '') {
         const ORD = `${
-            (args.head && args.head === false) ||
-            (args.tail && args.tail === true) ? 'DE' : 'A'
-        }SC`;
-
-        const int = args.rows || args.count,
-              fetchQuery = `ORDER BY id ${ORD}${int ? ` LIMIT ${int}` : ''}`;
-        return this.all(args, fetchQuery);
+                (args.head && args.head === false) ||
+                (args.tail && args.tail === true) ? 'DE' : 'A'
+            }SC`,
+            INT = args.rows || args.count,
+            FETCH_QUERY = `ORDER BY id ${ORD}${INT ? ` LIMIT ${INT}` : ''}`;
+        return this.all(args, FETCH_QUERY);
     }
     filter(args = { results: null }) {
         return (

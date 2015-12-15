@@ -6,6 +6,7 @@
 
 import { Model } from                           '../util/decorators';
 
+// jscs:disable
 @Model
 class AngieMigrations {
     constructor($Fields) {
@@ -18,3 +19,4 @@ class AngieMigrations {
         this.active = new $Fields.BooleanField();
     }
 }
+// jscs:enable

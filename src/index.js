@@ -1,5 +1,7 @@
-// TODO refactor angie-injector exceptions DONE
 // TODO add other keys - ability to set indices
+    // TODO add column as key, associated to key field DONE
+    // TODO use key - must be able to filter at the TOP LEVEL ONLY with key
+    // TODO all keys should be extended on to the result
 
 // TODO test/doc & wallaby
 // TODO hook up to coveralls
@@ -22,16 +24,17 @@ import                                          './models/angie-migrations.model
 
 // System Modules
 import { argv } from                            'yargs';
+import $Injector from                           'angie-injector';
 import $LogProvider from                        'angie-log';
 
 // Angie ORM Modules
 import { default as $$createModel } from        './util/scaffold/table';
 import { default as $$createMigration } from    './util/scaffold/migration';
+import { default as $$createKey } from          './util/scaffold/key';
 import { $$migrateAll, $$migrate } from         './util/invoke/migrations';
 
-const ERR = c => `No valid ${c} command component specified, please see the ` +
-        "help commands for more options",
-    TYPE = argv._[ 1 ] || '';
+const $Exceptions = $Injector.get('$Exceptions'),
+    TYPE = (argv._[ 1 ] || '').toLowerCase();
 
 // Route the CLI request to a specific command if running from CLI
 switch ((argv._[ 0 ] || '').toLowerCase()) {
@@ -62,20 +65,23 @@ switch ((argv._[ 0 ] || '').toLowerCase()) {
 }
 
 function handleCreationTask() {
-    switch (TYPE.toLowerCase()) {
+    switch (TYPE) {
         case 'model':
             $$createModel();
+            break;
+        case 'key':
+            $$createKey();
             break;
         case 'migration':
             $$createMigration();
             break;
         default:
-            $LogProvider.error(ERR('create'));
+            throw new $Exceptions.$$CommandLineError(1);
     }
 }
 
 function handleRunTask() {
-    switch (TYPE.toLowerCase()) {
+    switch (TYPE) {
         case 'migrations':
             $$migrateAll();
             break;
@@ -83,6 +89,6 @@ function handleRunTask() {
             $$migrate();
             break;
         default:
-            $LogProvider.error(ERR('run'));
+            throw new $Exceptions.$$CommandLineError(2);
     }
 }

@@ -112,13 +112,16 @@ export default function() {
         `Attempting to create table in database ${cyan(DATABASE.database.name)}`
     );
 
-    DATABASE.$$run(`CREATE SCHEMA ${DATABASE.database.name}`).then(function() {
-        return DATABASE.$$run(TABLE_FILE);
-    }).then(function() {
-        $LogProvider.info('Angie Model created and ready to use!');
-        process.exit(0);
-    }).catch(function(e) {
-        $LogProvider.error(e);
-        process.exit(1);
-    });
+    DATABASE.$$run(null, `CREATE SCHEMA ${DATABASE.database.name}`)
+        .then(function() {
+            return DATABASE.$$run(null, TABLE_FILE);
+        }).then(function() {
+            $LogProvider.info(
+                `Angie Model ${cyan(NAME)}created and ready to use!`
+            );
+            process.exit(0);
+        }).catch(function(e) {
+            $LogProvider.error(e);
+            process.exit(1);
+        });
 }

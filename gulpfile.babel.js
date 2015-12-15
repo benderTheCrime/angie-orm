@@ -2,8 +2,7 @@ import { default as register } from     'babel-core/register';
 register({
     only: [
         '**/node_modules/angie*/**',
-        '**/src/**',
-        '**/test/**'
+        '**/{src,test,migrations}/**'
     ],
     stage: 0
 });
@@ -41,7 +40,7 @@ gulp.task('eslint', function () {
     }));
 });
 gulp.task('jscs', [ 'eslint' ], function () {
-    return gulp.src([ SRC, TEST_SRC ])
+    return gulp.src([ './src/**/*(!angie-migrations.model).js', TEST_SRC ])
         .pipe(jscs({
             fix: true,
             configPath: '.jscsrc',
