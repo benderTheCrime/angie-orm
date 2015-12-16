@@ -23,7 +23,7 @@ class $$InvalidModelFieldReferenceError {
         const msg = `Invalid param for Model ${cyan(name)}.${cyan(field)}`;
 
         $LogProvider.error(msg);
-        throw new Error(msg);
+        throw new ReferenceError(msg);
     }
 }
 

@@ -5,12 +5,10 @@
  */
 
 // System Modules
-import util from                        'util';
+import util from                                'util';
 
- // Angie ORM Modules
- import {
-     $$InvalidModelFieldReferenceError
- } from                                  '../../services/exceptions';
+// Angie ORM Modules
+import $$InvalidModelFieldReferenceError from   '../../services/exceptions/invalid-model-field-reference-error';
 
 class DBObjectUtil {
     constructor(database, model, query = '') {
@@ -31,14 +29,13 @@ class DBObjectUtil {
         return this.delete(rows).then(function() {
             let proms = [];
 
-            return Promise.all(rows.map(v => me.model.create(util._extend(v, args))))
-                .then(function(querysets) {
-                    const ROWS = Array.prototype.concat
-                        .apply([], querysets.map(v => v.results));
-
-                    // TODO map all of the newly created rows
-                    return me.database.$$queryset(me.model, args.query, ROWS, []);
-                });
+            return Promise.all(rows.map(
+                v => me.model.create(util._extend(v, args))
+            )).then(function(querysets) {
+                const ROWS = Array.prototype.concat
+                    .apply([], querysets.map(v => v.results));
+                return me.database.$$queryset(me.model, args.query, ROWS, []);
+            });
         });
     }
     delete(rows = []) {
@@ -48,22 +45,17 @@ class DBObjectUtil {
             QUERY = `UPDATE ${
                 this.model.name
             } SET \`deleted\` = 1 WHERE \`id\` in (${IDS});`
-
         return this.database.$$run(this.model, QUERY);
     }
     static validateInsertedDBObject(model, args = {}) {
         Object.keys(args).forEach(k => {
             const VALUE = args[ k ];
 
-            console.log(k , model[ k ]);
-            console.log(VALUE);
-
             if (this.IGNORE_KEYS.includes(k)) {
                 delete args[ k ];
             } else if (
                 !(model[ k ] && model[ k ].type && model[ k ].validate(VALUE))
             ) {
-                console.log('k', k, model[ k ], model[ k ].type, model[ k ].validate(VALUE));
                 throw new $$InvalidModelFieldReferenceError(model.name, k);
             }
         });
@@ -85,22 +77,23 @@ class DBObjectUtil {
 }
 
 DBObjectUtil.IGNORE_KEYS = [
-    'database',
     '$$database',
+    'created',
+    'database',
+    'fields',
+    'first',
+    'head',
+    'id',
+    'keys',
+    'last',
     'model',
     'name',
-    'fields',
-    'tail',
-    'head',
-    'rows',
-    'update',
-    'first',
-    'last',
-    'values',
-    'id',
-    'created',
     'query',
-    'results'
+    'results',
+    'rows',
+    'tail',
+    'update',
+    'values'
 ];
 
 export default DBObjectUtil;

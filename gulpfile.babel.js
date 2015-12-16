@@ -25,7 +25,7 @@ import { bold, red } from               'chalk';
 const bread = str => bold(red(str));
 
 const SRC_DIR = './src',
-    SRC = `${SRC_DIR}/**/*.js`,
+    SRC = `${SRC_DIR}/**/*(!angie-migrations.model).js`,
     TRANSPILED_SRC_DIR = './dist',
     TRANSPILED_SRC = `${TRANSPILED_SRC_DIR}/**/*.js`,
     TEST_SRC = './test/src/**/*.spec.js',
@@ -40,7 +40,7 @@ gulp.task('eslint', function () {
     }));
 });
 gulp.task('jscs', [ 'eslint' ], function () {
-    return gulp.src([ './src/**/*(!angie-migrations.model).js', TEST_SRC ])
+    return gulp.src([ SRC, TEST_SRC ])
         .pipe(jscs({
             fix: true,
             configPath: '.jscsrc',
@@ -67,7 +67,7 @@ gulp.task('esdoc', function() {
     return gulp.src(SRC_DIR).pipe(esdoc({ destination: DOC_SRC }));
 });
 gulp.task('babel', function(cb) {
-    gulp.src(SRC).pipe(babel({
+    gulp.src(`${SRC_DIR}/**`).pipe(babel({
         stage: 0,
         ignore: [ 'src/templates/**' ],
         comments: false

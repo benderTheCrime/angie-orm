@@ -1,7 +1,4 @@
-// TODO add other keys - ability to set indices
-    // TODO add column as key, associated to key field DONE
-    // TODO use key - must be able to filter at the TOP LEVEL ONLY with key
-    // TODO all keys should be extended on to the result
+// TODO test keys
 
 // TODO test/doc & wallaby
 // TODO hook up to coveralls

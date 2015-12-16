@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node dist/index.js",
     "test": "gulp test && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "postinstall": "babel src --out-dir dist --comments false --copy-files"
+    "postinstall": "gulp babel"
   },
   "engines": {
     "iojs": "*",

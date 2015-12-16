@@ -1,4 +1,4 @@
-const SRC = 'src/**/*.js',
+const SRC = 'src/**/*(!angie-migrations.model).js',
     TEST_SRC = 'test/src/**/*.spec.js';
 
 module.exports = function() {

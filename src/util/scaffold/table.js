@@ -117,7 +117,7 @@ export default function() {
             return DATABASE.$$run(null, TABLE_FILE);
         }).then(function() {
             $LogProvider.info(
-                `Angie Model ${cyan(NAME)}created and ready to use!`
+                `Angie Model ${cyan(NAME)} created and ready to use!`
             );
             process.exit(0);
         }).catch(function(e) {

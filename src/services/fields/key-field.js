@@ -5,15 +5,13 @@
  */
 
 // Angie ORM modules
-import IntegerField from       './integer-field';
+import BaseField from       './base-field';
 
-class KeyField extends IntegerField {
+class KeyField extends BaseField {
     constructor() {
         super(1);
         this.type = 'KeyField';
-        this.unique = false;
-        this.minValue = 1;
-        this.maxLength = 11;
+        this.unique = true;
         this.nullable = false;
     }
 }

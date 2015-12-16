@@ -17,7 +17,7 @@ import {
 import DBObjectUtil from                '../util/util/db-object-util';
 
 // Keys we do not necessarily want to parse as query arguments
-const OPERATOR_REGEXP = /^((<|>)=?)[^><]+$/g;
+const OPERATOR_REGEXP = /^(<|>=?)([^><]+)$/g;
 
 /**
  * @desc BaseDBConnection is a private class which is not exposed to the Angie
@@ -49,25 +49,56 @@ class BaseDBConnection {
         }`;
     }
     fetch(args = {}, filterQuery = '') {
-        const ORD = `${
-                (args.head && args.head === false) ||
-                (args.tail && args.tail === true) ? 'DE' : 'A'
-            }SC`,
+        const ORD = `${args.head === false || args.tail === true ? 'DE' : 'A'}SC`,
             INT = args.rows || args.count,
-            FETCH_QUERY = `ORDER BY id ${ORD}${INT ? ` LIMIT ${INT}` : ''}`;
+            FETCH_QUERY = filterQuery + `ORDER BY id ${ORD}${
+                INT ? ` LIMIT ${INT}` : ''
+            }`;
         return this.all(args, FETCH_QUERY);
+    }
+    filterQuery(args) {
+        const MODEL = args.model,
+            TERM_DELIMITER = ' && ';
+        let filterQuery = TERM_DELIMITER,
+            filterTerms = [];
+
+        args.keys = {};
+
+        for (let key in args) {
+            const VALUE = args[ key ],
+                PLAIN_VALUE = VALUE.replace(OPERATOR_REGEXP, '$2'),
+                OPERATOR = VALUE.replace(OPERATOR_REGEXP, '$1'),
+                TYPE = MODEL[ key ].type;
+
+            if (!IGNORE_KEYS.includes(key)) {
+                if (MODEL[ key ]) {
+                    if (TYPE.indexOf('KeyField') > -1) {
+                        filterTerms.push(
+                            ` key${OPERATOR || '=' }${
+                                TYPE.indexOf('Integer') > -1 ?
+                                    PLAIN_VALUE : `"${PLAIN_VALUE}"`
+                            }`
+                        );
+                    }
+                } else {
+                    throw new $$InvalidModelFieldReferenceError(MODEL.name, key);
+                }
+            }
+        }
+
+        filterQuery += filterTerms.join(TERM_DELIMITER);
+        return this.fetch(args, filterQuery);
     }
     filter(args = { results: null }) {
         return (
-            args.results ? Promise.resolve(args.results) : this.fetch(args)
-                .then(q => q.results)
+            args.results ?
+                Promise.resolve(args.results) : this.filterQuery(args)
+                    .then(q => q.results)
         ).then(results => {
             if (results.length) {
                 for (let key in args) {
                     let value = args[ key ];
                     const VALUE_IS_STRING = typeof value === 'string';
-
-                    console.log('VALUE', value);
 
                     if (DBObjectUtil.IGNORE_KEYS.indexOf(key) > -1) {
                         continue;
@@ -82,7 +113,7 @@ class BaseDBConnection {
                         VALUE_IS_STRING &&
                         OPERATOR_REGEXP.test(value)
                     ) {
-                        let plainValue = value.replace(OPERATOR_REGEXP, ''),
+                        let plainValue = value.replace(OPERATOR_REGEXP, '$2'),
                             fn = v => true;
 
                         // Considerations for numeric values
@@ -92,7 +123,7 @@ class BaseDBConnection {
                             plainValue = parseFloat(plainValue);
                         }
 
-                        switch (value.match(OPERATOR_REGEXP)[ 0 ]) {
+                        switch (value.replace(OPERATOR_REGEXP, '$1')) {
                             case '>=':
                                 fn = v => v[ key ] >= plainValue;
                                 break;
@@ -145,7 +176,23 @@ class BaseDBConnection {
         let results = [];
 
         if (rows instanceof Array) {
-            rows.forEach(function(v) {
+            rows.map(function(v) {
+                let data = util._extend({
+                    id: v.id,
+                    created: v.created
+                }, model.$$parse(v.data));
+
+                for (let key in v) {
+                    if (
+                        model[ key ] &&
+                        model[ key ].type.indexOf('KeyField') > -1
+                    ) {
+                        data[ key ] = v[ key ];
+                    }
+                }
+
+                return data;
+            }).forEach(function(v) {
                 const ROW = util._extend({}, v);
 
                 // Add update method to row to allow the single row to be
@@ -160,7 +207,6 @@ class BaseDBConnection {
 
         // Add update method to row set so that the whole queryset can be
         // updated
-        // TODO use extend?
         rows.update = queryset.update.bind(queryset, results);
         rows.delete = queryset.delete.bind(queryset, results);
 

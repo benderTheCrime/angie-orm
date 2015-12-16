@@ -88,10 +88,7 @@ class MySqlConnection extends BaseDBConnection {
                         rows = [];
                     }
 
-                    // TODO does this belong here?
-                    resolve([ rows.map(v => util._extend({
-                        id: v.id, created: v.created
-                    }, model.$$parse(v.data))), e ]);
+                    resolve([ rows, e ]);
                 });
             });
         }).then(function(args) {

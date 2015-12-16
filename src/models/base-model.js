@@ -15,25 +15,6 @@ import {
     $$InvalidModelFieldReferenceError
 } from                                  '../services/exceptions';
 
-const IGNORE_KEYS = [
-    'database',
-    '$$database',
-    'model',
-    'name',
-    'fields',
-    'tail',
-    'head',
-    'rows',
-    'update',
-    'first',
-    'last',
-    'values'
-];
-
-// TODO you can't fetch ids
-// TODO you can't filter out values
-// TODO you cant update, only delete and create
-// TODO filter implies selecting all and then manually checking the results
 class BaseModel {
     constructor(proto) {
         this.$$Proto = proto;
@@ -65,8 +46,6 @@ class BaseModel {
             .apply(this, util._extend({ model: this }, args))
             .then(queryset => !!queryset[ 0 ]);
     }
-
-    // TODO this is an ill-advised intensive operation
     $createUnlessExists(args = {}) {
         args = util._extend({ model: this }, args);
 
@@ -75,7 +54,6 @@ class BaseModel {
             .apply(this, args)
             .then(v => this[ v ? 'fetch' : 'create' ](args));
     }
-
     $$prep(args = {}) {
         const database = typeof args === 'object' &&
             args.hasOwnProperty('database') ? args.database : null;
@@ -88,8 +66,6 @@ class BaseModel {
         return this.$$Proto.encode(obj);
     }
     $$parse(obj) {
-
-        // TODO buffer
         try {
             return this.$$Proto.decode(obj);
         } catch(e) {
@@ -99,7 +75,6 @@ class BaseModel {
                 throw e;
             }
         }
-
     }
 }
 
