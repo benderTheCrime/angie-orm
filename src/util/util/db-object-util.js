@@ -22,8 +22,10 @@ class DBObjectUtil {
 
         let me = this;
 
-        // Check that the key actually exists on the model and that it is of
-        // valid type
+        /**
+         * Check that the key actually exists on the model and that it is of
+         * valid type
+         */
         DBObjectUtil.validateInsertedDBObject(this.model, args);
 
         return this.delete(rows).then(function() {
@@ -69,11 +71,7 @@ class DBObjectUtil {
     static last() {
         return this.length ? this.slice(-1)[ 0 ] : null;
     }
-    static* yield(results) {
-        for (let result of results) {
-            yield result;
-        }
-    }
+
 }
 
 DBObjectUtil.IGNORE_KEYS = [

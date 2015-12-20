@@ -50,26 +50,14 @@ class BaseField {
         if (
             typeof value === 'string' &&
             (
-                (
-                    this.minLength &&
-                    value.length < this.minLength
-                ) ||
-                (
-                    this.maxLength &&
-                    value.length > this.maxLength
-                )
+                (this.minLength && value.length < this.minLength) ||
+                (this.maxLength && value.length > this.maxLength)
             )
         ) {
             return false;
         } else if (
-            (
-                this.minValue &&
-                value < this.minValue
-            ) ||
-            (
-                this.maxValue &&
-                value > this.maxValue
-            )
+            (this.minValue && value < this.minValue) ||
+            (this.maxValue && value > this.maxValue)
         ) {
             return false;
         }

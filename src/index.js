@@ -1,13 +1,16 @@
-// TODO test keys
+
+
+// TODO release log, injector - add editor config to injector
+    // TODO merge all branches/tags into angie-framework
+    // TODO verify release
+    // TODO generate esdocs
+// TODO release angie
+// TODO shrinkwrap
+// TODO release this
+// TODO bindings
 
 // TODO test/doc & wallaby
 // TODO hook up to coveralls
-
-// TODO release log, injector
-// TODO shrinkwrap
-// TODO release angie
-// TODO release this
-// TODO bindings
 
 /**
  * @module index.js

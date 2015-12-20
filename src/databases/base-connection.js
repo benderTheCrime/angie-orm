@@ -219,7 +219,8 @@ class BaseDBConnection {
                 last: DBObjectUtil.last,
                 filter: DBObjectUtil.filter.bind(null, model, results),
                 generator: DBObjectUtil.yield.bind(null, results),
-                yield: DBObjectUtil.yield.bind(null, results)
+                yield: DBObjectUtil.hasOwnProperty('yield') ?
+                    DBObjectUtil.yield.bind(null, results) : null
             }
         );
     }
