@@ -6,6 +6,7 @@
     // TODO generate esdocs
 // TODO release angie
 // TODO shrinkwrap
+// TODO remove bin commands?
 // TODO release this
 // TODO bindings
 
