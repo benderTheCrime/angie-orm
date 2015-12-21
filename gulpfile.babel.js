@@ -16,7 +16,6 @@ import jscs from                        'gulp-jscs';
 import { Instrumenter } from            'isparta';
 import mocha from                       'gulp-mocha';
 import istanbul from                    'gulp-istanbul';
-import cobertura from                   'istanbul-cobertura-badger';
 import esdoc from                       'gulp-esdoc';
 import babel from                       'gulp-babel';
 import copy from                        'gulp-copy';
@@ -59,10 +58,6 @@ gulp.task(
     [ 'istanbul:dist' ],
     mochaHandler.bind(null, 'dist', undefined)
 );
-gulp.task('cobertura', [ 'mocha:src' ], function(cb) {
-    cobertura('coverage/cobertura-coverage.xml', 'svg', cb);
-});
-
 gulp.task('esdoc', function() {
     return gulp.src(SRC_DIR).pipe(esdoc({ destination: DOC_SRC }));
 });
@@ -91,7 +86,7 @@ gulp.task('watch', [ 'test' ], function() {
 gulp.task('watch:babel', [ 'babel' ], function() {
     gulp.watch([ 'src/**' ], [ 'babel' ]);
 });
-gulp.task('default', [ 'cobertura', 'babel', 'esdoc' ]);
+gulp.task('default', [ 'test', 'babel', 'esdoc' ]);
 
 // Utility Tasks
 gulp.task('bump', function() {

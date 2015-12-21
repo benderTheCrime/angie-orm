@@ -1,5 +1,8 @@
+// TODO merge into angie-framework, branches and tags
 
 // TODO release angie
+    // TODO Add tests
+    // TODO review PR code
 // TODO shrinkwrap
 // TODO remove bin commands?
 // TODO release this - flag as a beta release 0.4.0-beta1
