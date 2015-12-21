@@ -4,10 +4,6 @@
  * @date 8/23/2015
  */
 
-function Base(name) {
-    return (obj) => { global.app[ name ](obj.prototype.constructor.name, obj); };
-}
-
-const Model = Base('Model');
-
-export {Model};
+const BASE = m => o => app[ m ](o.prototype.constructor.name, o),
+    Model = BASE('Model');
+export { Model };

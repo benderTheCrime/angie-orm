@@ -1,0 +1,12 @@
+package AngieORM.AngieMigrations;
+
+// angie_migrations
+message AngieMigrations {
+
+    // I strongly recommend making all other fields optional
+    required string uuid = 1;
+    required string filename = 2;
+    required bool   active = 3;
+
+    // Next field = 4;
+}

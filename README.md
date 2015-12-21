@@ -15,17 +15,27 @@
 ### About
 Angie ORM is a feature-complete database relationship manager designed for NodeJS.
 
-#### Current Database Support
-* MySQL via the [node-mysql](https://github.com/felixge/node-mysql "node-mysql") package
-* sqlite3 via the [node-sqlite3](https://github.com/mapbox/node-sqlite3 "node-sqlite3") package
-
-#### Planned Database Support
-* Firebase
-* MongoDB
-* Couchbase
-* Postgres
+**Note**: As of version `1.0.0` this package only works with Angie Framework applications and only works with. Protocol Buffers. If you would like to use Sqlite or full MySQL you can continue to use a legacy version of this package. If you would like to use a different database you can develop package support by mimicking the way this package communicates with protocol buffers.
 
 ### Usage
+To use the Angie ORM, you must first install Protocol Buffers and MySQL. Angie uses Protocol Buffers to handle serializing and parsing binary data associated with data objects. It stores those objects in MySQL and uses MySQL to manage the relationships in between those objects.
+
+There is no concept of migrations, however, one may write a config script that only executes in the event it has not already been run on application start.
+
+#### Some Important Concepts:
+* There are no updates, only inserts! You can "delete," but it is just flagging a record deleted.
+* There are no ManyToMany relationships! there are only cross OneToOne nested relationships.
+
+#### Install Protocol Buffers:
+* Download Protocol Buffers from here: https://developers.google.com/protocol-buffers/docs/downloads
+* Untar the archive
+* Follow the instructions in the downloaded folder in the `README.md` file (this will take some time...try not to PANIC!!).
+
+#### Run `angie-orm createmodel`
+
+
+
+
 ```bash
 npm i -g angie-orm
 angie-orm help
@@ -140,7 +150,7 @@ Create/Update queries require all non nullable fields to have a value in the arg
 
 Update queries are available on the entire queryset as well as each row. Additionally, methods to retrieve the `first` and `last` row in the returned records are available. Many to many fields have the added functionality of fetching `all` related rows, `fetch`ing, `filtering` related rows, and `add`ing, and `removing` related rows. The arguments to these methods must be existing related database objects.
 
-For a list of Frequently Asked Questions, please see the [FAQ](https://github.com/benderTheCrime/angie-orm/blob/master/FAQ.md "FAQ") and the [CHANGELOG](https://github.com/benderTheCrime/angie-orm/blob/master/CHANGELOG.md "CHANGELOG") for an up to date list of changes. Contributors to this Project are outlined in the [CONTRIBUTORS](https://github.com/benderTheCrime/angie-orm/blob/master/CONTRIBUTORS.md "CONTRIBUTORS") file.
+For a list of Frequently Asked Questions, please see the [FAQ](https://github.com/benderTheCrime/angie-orm/blob/master/md/FAQ.md "FAQ") and the [CHANGELOG](https://github.com/benderTheCrime/angie-orm/blob/master/md/CHANGELOG.md "CHANGELOG") for an up to date list of changes. Contributors to this Project are outlined in the [CONTRIBUTORS](https://github.com/benderTheCrime/angie-orm/blob/master/md/CONTRIBUTORS.md "CONTRIBUTORS") file.
 
 ### Angie
-Please see the [site](http://benderthecrime.github.io/angie/) for information about the project, a quickstart guide, and documentation and the [CHANGELOG](https://github.com/benderTheCrime/angie/blob/master/CHANGELOG.md) for an up to date list of changes.
+Please see the [site](http://benderthecrime.github.io/angie/) for information about the project, a quickstart guide, and documentation and the [CHANGELOG](https://github.com/benderTheCrime/angie/blob/master/md/CHANGELOG.md) for an up to date list of changes.

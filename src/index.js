@@ -1,95 +1,93 @@
+// TODO merge into angie-framework, branches and tags
+
+// TODO release angie
+    // TODO Add tests
+    // TODO review PR code
+// TODO shrinkwrap
+// TODO remove bin commands?
+// TODO release this - flag as a beta release 0.4.0-beta1
+// TODO bindings
+
+// TODO test/doc & wallaby
+// TODO hook up to coveralls
+
 /**
  * @module index.js
  * @author Joe Groseclose <@benderTheCrime>
  * @date 8/23/2015
  */
 
-// System Modules
-import {exec} from                  'child_process';
-import {gray} from                  'chalk';
-import $LogProvider from            'angie-log';
+// Global modules
+import                                          './angie';
+import                                          './models/angie-migrations.model';
 
-// Angie ORM Global Modules
-import './Angie';
+// System Modules
+import { argv } from                            'yargs';
+import $Injector from                           'angie-injector';
+import $LogProvider from                        'angie-log';
 
 // Angie ORM Modules
-import AngieDatabaseRouter from     './databases/AngieDatabaseRouter';
-import * as $$FieldProvider from    './models/$Fields';
+import { default as $$createModel } from        './util/scaffold/table';
+import { default as $$createMigration } from    './util/scaffold/migration';
+import { default as $$createKey } from          './util/scaffold/key';
+import { $$migrateAll, $$migrate } from         './util/invoke/migrations';
 
-const p = process;
-let args = [];
-
-// Remove trivial arguments
-p.argv.forEach(function(v) {
-    if (!v.match(/(node|iojs|index|help|angie(\-orm)?)/)) {
-        args.push(v);
-    } else if (v === 'help') {
-        help();
-    }
-});
+const $Exceptions = $Injector.get('$Exceptions'),
+    TYPE = (argv._[ 1 ] || '').toLowerCase();
 
 // Route the CLI request to a specific command if running from CLI
-if (
-    args.length &&
-    args.some((v) => [ 'syncdb', 'migrate', 'test' ].indexOf(v) > -1)
-) {
-    switch ((args[0] || '').toLowerCase()) {
-        case 'syncdb':
-            AngieDatabaseRouter(args).sync();
+switch ((argv._[ 0 ] || '').toLowerCase()) {
+    case 'create':
+        handleCreationTask();
+        break;
+    case 'c':
+        handleCreationTask();
+        break;
+    case 'run':
+        handleRunTask();
+        break;
+    case 'r':
+        handleRunTask();
+        break;
+    case 'test':
+
+        // TODO is there any way to carry the stream output from gulp instead
+        // of capturing stdout?
+        exec(`cd ${__dirname} && gulp`, function(e, std, err) {
+            const ERROR = err || e;
+            if (ERROR) {
+                $LogProvider.error(ERROR);
+            } else {
+                $LogProvider.info(std);
+            }
+        });
+}
+
+function handleCreationTask() {
+    switch (TYPE) {
+        case 'model':
+            $$createModel();
             break;
-        case 'migrate':
-            AngieDatabaseRouter(args).migrate();
+        case 'key':
+            $$createKey();
+            break;
+        case 'migration':
+            $$createMigration();
             break;
         default:
-            runTests();
+            throw new $Exceptions.$$CommandLineError(1);
     }
 }
 
-function runTests() {
-
-    // TODO is there any way to carry the stream output from gulp instead
-    // of capturing stdout?
-    exec(`cd ${__dirname} && gulp`, function(e, std, err) {
-        $LogProvider.info(std);
-        if (err) {
-            $LogProvider.error(err);
-        }
-        if (e) {
-            throw new Error(e);
-        }
-    });
+function handleRunTask() {
+    switch (TYPE) {
+        case 'migrations':
+            $$migrateAll();
+            break;
+        case 'migration':
+            $$migrate();
+            break;
+        default:
+            throw new $Exceptions.$$CommandLineError(2);
+    }
 }
-
-function help() {
-    $LogProvider.bold('Angie ORM');
-    console.log('A Feature-Complete Database Relationship Manager Designed for NodeJS');
-    console.log('\r');
-    $LogProvider.bold('Version:');
-    console.log(global.ANGIE_ORM_VERSION);
-    console.log('\r');
-    $LogProvider.bold('Commands:');
-    console.log(
-        'syncdb [ database ]                                                   ' +
-        gray(
-            'Sync the current specified databases in the AngieFile. ' +
-            'Defaults to the default created database'
-        )
-    );
-    console.log(
-        'migrations [ --destructive -- optional ] [ --dryrun -- optional ]     ' +
-        gray(
-            'Checks to see if the database and the specified ' +
-            'models are out of sync. Generates NO files.'
-        )
-    );
-    console.log(
-        'test                                                                  ' +
-        gray(
-            'Runs the Angie test suite and prints the results in the ' +
-            'console'
-        )
-    );
-    p.exit(0);
-}
-
-export {$$FieldProvider as $$Fields};

@@ -2,8 +2,7 @@ import { default as register } from     'babel-core/register';
 register({
     only: [
         '**/node_modules/angie*/**',
-        '**/src/**',
-        '**/test/**'
+        '**/{src,test,migrations}/**'
     ],
     stage: 0
 });
@@ -17,15 +16,15 @@ import jscs from                        'gulp-jscs';
 import { Instrumenter } from            'isparta';
 import mocha from                       'gulp-mocha';
 import istanbul from                    'gulp-istanbul';
-import cobertura from                   'istanbul-cobertura-badger';
 import esdoc from                       'gulp-esdoc';
 import babel from                       'gulp-babel';
+import copy from                        'gulp-copy';
 import { bold, red } from               'chalk';
 
 const bread = str => bold(red(str));
 
 const SRC_DIR = './src',
-    SRC = `${SRC_DIR}/**/*.js`,
+    SRC = `${SRC_DIR}/**/*(!angie-migrations.model).js`,
     TRANSPILED_SRC_DIR = './dist',
     TRANSPILED_SRC = `${TRANSPILED_SRC_DIR}/**/*.js`,
     TEST_SRC = './test/src/**/*.spec.js',
@@ -59,17 +58,22 @@ gulp.task(
     [ 'istanbul:dist' ],
     mochaHandler.bind(null, 'dist', undefined)
 );
-gulp.task('cobertura', [ 'mocha:src' ], function(cb) {
-    cobertura('coverage/cobertura-coverage.xml', 'svg', cb);
-});
-
 gulp.task('esdoc', function() {
     return gulp.src(SRC_DIR).pipe(esdoc({ destination: DOC_SRC }));
 });
-gulp.task('babel', function() {
-    return gulp.src(SRC).pipe(babel({
+gulp.task('babel', function(cb) {
+    gulp.src(`${SRC_DIR}/**`).pipe(babel({
+        stage: 0,
+        ignore: [ 'src/templates/**' ],
         comments: false
-    })).pipe(gulp.dest(TRANSPILED_SRC_DIR));
+    })).pipe(gulp.dest(TRANSPILED_SRC_DIR)).on('finish', function() {
+        gulp.src(`${SRC_DIR}/templates/**`).pipe(
+            copy(`${TRANSPILED_SRC_DIR}/templates`, {
+                prefix: 2
+            })
+        );
+        cb();
+    });
 });
 
 // Bundled Tasks
@@ -79,7 +83,10 @@ gulp.task('test', [ 'test:src' ]);
 gulp.task('watch', [ 'test' ], function() {
     gulp.watch([ SRC, TEST_SRC ], [ 'test' ]);
 });
-gulp.task('default', [ 'cobertura', 'babel', 'esdoc' ]);
+gulp.task('watch:babel', [ 'babel' ], function() {
+    gulp.watch([ 'src/**' ], [ 'babel' ]);
+});
+gulp.task('default', [ 'test', 'babel', 'esdoc' ]);
 
 // Utility Tasks
 gulp.task('bump', function() {
@@ -122,6 +129,6 @@ function mochaHandler(src, coverage = '/tmp') {
         reportOpts: {
             dir: coverage
         },
-        reporters: [ 'text', 'text-summary', 'html', 'cobertura' ]
+        reporters: [ 'text', 'text-summary', 'lcov' ]
     }));
 }

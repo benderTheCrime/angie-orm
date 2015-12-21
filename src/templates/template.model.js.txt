@@ -1,0 +1,17 @@
+/**
+ * @module %s.js
+ * @author <Your Name>
+ * @date %s
+ */
+
+import { Model } from     'angie-orm/src/util/decorators';
+
+@Model
+class %s {
+    constructor($Fields) {
+        this.name = '%s';
+
+        // Create fields here
+        this.uuid = new $Fields.CharField();
+    }
+}

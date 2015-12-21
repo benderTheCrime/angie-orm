@@ -1,0 +1,10 @@
+/**
+ * @module %s-%s.js
+ * @author <Your Name>
+ * @date %s
+ */
+
+export default function() {
+
+    // TODO add migration code here
+};
