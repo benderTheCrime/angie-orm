@@ -13,7 +13,7 @@ import $LogProvider from                        'angie-log';
 
 // Angie ORM Modules
 import BaseModel from                           './models/base-model';
-import * as $$FieldProvider from                './services/fields';
+import * as $Fields from                        './services/fields';
 import {
     $$InvalidConfigError,
     $$InvalidModelConfigError,
@@ -24,7 +24,7 @@ import {
 // Setup the app or inherit the app from the `global` Namespace
 let app = global.app;
 
-app.services.$Fields = $$FieldProvider;
+app.services.$Fields = $Fields;
 app.$$registry.$Fields = 'services';
 app = util._extend(app, {
     Model,
