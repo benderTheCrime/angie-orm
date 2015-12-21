@@ -1,13 +1,8 @@
 
-
-// TODO release log, injector - add editor config to injector
-    // TODO merge all branches/tags into angie-framework
-    // TODO verify release
-    // TODO generate esdocs
 // TODO release angie
 // TODO shrinkwrap
 // TODO remove bin commands?
-// TODO release this
+// TODO release this - flag as a beta release 0.4.0-beta1
 // TODO bindings
 
 // TODO test/doc & wallaby
